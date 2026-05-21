@@ -1,0 +1,24 @@
+{
+  "name": "battleship",
+  "version": "1.0.0",
+  "description": "Creating a battle ship game using Test Driven Development (TDD)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Icarium12/BattleShip.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Icarium12/BattleShip/issues"
+  },
+  "homepage": "https://github.com/Icarium12/BattleShip#readme",
+  "devDependencies": {
+    "webpack": "^5.107.0",
+    "webpack-cli": "^7.0.2"
+  }
+}
