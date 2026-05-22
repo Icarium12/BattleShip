@@ -3,7 +3,7 @@ export class Ship {
     constructor(length) {
         this.length = length;
         this.hitNum = 0;
-        this.isSunk = false;
+        this.sunk = false;
     }
 
     hit() {
@@ -12,7 +12,7 @@ export class Ship {
 
     isSunk() {
         if (this.hitNum === this.length) {
-            this.isSunk = true;
+            this.sunk = true;
         }
     }
 }
