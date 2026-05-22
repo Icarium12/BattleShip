@@ -4,7 +4,7 @@
   "description": "Creating a battle ship game using Test Driven Development (TDD)",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -18,6 +18,8 @@
   },
   "homepage": "https://github.com/Icarium12/BattleShip#readme",
   "devDependencies": {
+    "@babel/preset-env": "^7.29.5",
+    "jest": "^30.4.2",
     "webpack": "^5.107.0",
     "webpack-cli": "^7.0.2"
   }

@@ -1,4 +1,4 @@
-class Ship {
+export class Ship {
 
     constructor(length) {
         this.length = length;
