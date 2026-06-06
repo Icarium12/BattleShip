@@ -6,7 +6,8 @@ class Node {
         this.x = x;
         this.y = y;
         this.id = `${x}, ${y}`;
-        this.value;
+        this.hasShip = false
+        this.value = null;
         this.hit;
         this.neighbors = [];
         this.up = null;
@@ -72,6 +73,17 @@ class Gameboard {
                     currentNode.right = this.board[i][j+1];
                 }
             }
+        }
+    }
+
+    placeShips() {
+        this.board[9][5].value = this.ship1;
+        this.board[9][5].hasShip = true;
+        let currentNode = this.board[9][5].right;
+        for(let i = 1; i < this.board[9][5].value.length; i++) {
+            currentNode.value = this.ship1;
+            currentNode.hasShip = true;
+            currentNode = currentNode.right;
         }
     }
 
