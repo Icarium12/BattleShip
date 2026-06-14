@@ -42,6 +42,9 @@ class Gameboard {
         this.ship8 = new Ship(2);
         this.ship9 = new Ship(1);
         this.ship10 = new Ship(1);
+        this.ships = [this.ship1, this.ship2, this.ship3, this.ship4, this.ship5,
+                    this.ship6, this.ship7, this.ship8, this.ship9, this.ship10
+        ]
     }
 
     createBoard() {
@@ -283,5 +286,32 @@ class Gameboard {
         });
     }
 
+    receiveAttack(x, y) {
+        const target = this.board[x][y];
+        if (target.hit === true) {
+            const message = "Loction has already been atacked";
+            return message;
+        }
+        else if (target.hasShip === false) {
+            target.hit = true;
+        }
+        else {
+            target.value.hit();
+            target.value.isSunk();
+            target.hit = true;
+        }
+    }
+
+    checkShipsSunk() {
+        const sunkCount = 0;
+        this.ships.forEach(ship => {
+            if (ship.sunk === true) {
+                sunkCount += 1;
+            }
+        });
+        if (sunkCount === 10) {
+            return "All ships sunk; You have won";
+        }
+    }
     
 }
