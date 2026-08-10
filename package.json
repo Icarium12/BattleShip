@@ -19,7 +19,9 @@
   "homepage": "https://github.com/Icarium12/BattleShip#readme",
   "devDependencies": {
     "@babel/preset-env": "^7.29.5",
+    "css-loader": "^7.1.4",
     "jest": "^30.4.2",
+    "style-loader": "^4.0.0",
     "webpack": "^5.107.0",
     "webpack-cli": "^7.0.2"
   }
