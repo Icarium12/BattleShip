@@ -1,4 +1,5 @@
 import { Ship } from "./ship";
+import  { Gameboard } from "./gameboard";
 
 test('test for hit method', () => {
     const instance = new Ship(3);
@@ -10,4 +11,23 @@ test('test for isSunk method', () => {
     const instance = new Ship(0);
     instance.isSunk();
     expect(instance.sunk).toBe(true);
+})
+
+test('test for gameboard receiveAttack', () => {
+    const gameboard = new Gameboard();
+    gameboard.createBoard();
+    gameboard.placeShip();
+    gameboard.receiveAttack(5, 7);
+    expect(gameboard.board[5][7].hit).toBe(true);
+})
+
+test('test for gameboard checkShipSunk', () => {
+    const gameboard = new Gameboard();
+    gameboard.createBoard();
+    gameboard.placeShip();   
+    gameboard.ships.forEach(ship => {
+        ship.sunk = true;
+    });
+    expect(gameboard.checkShipSunk()).toBe("All ships sunk; You have won");
+
 })

@@ -28,7 +28,7 @@ class Node {
 }
 
 
-class Gameboard {
+export class Gameboard {
 
     constructor() {
         this.board = [];
@@ -88,7 +88,7 @@ class Gameboard {
         const ship1Coords = [
             {r: 0, c: 2},
             {r: 0, c: 3},
-            {r: 0, c: 3}
+            {r: 0, c: 4}
         ];
 
         ship1Coords.forEach((coord, index) => {
@@ -302,8 +302,8 @@ class Gameboard {
         }
     }
 
-    checkShipsSunk() {
-        const sunkCount = 0;
+    checkShipSunk() {
+        let sunkCount = 0;
         this.ships.forEach(ship => {
             if (ship.sunk === true) {
                 sunkCount += 1;
