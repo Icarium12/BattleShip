@@ -16,7 +16,7 @@ test('test for isSunk method', () => {
 test('test for gameboard receiveAttack', () => {
     const gameboard = new Gameboard();
     gameboard.createBoard();
-    gameboard.placeShip();
+    gameboard.placeShipDefault();
     gameboard.receiveAttack(5, 7);
     expect(gameboard.board[5][7].hit).toBe(true);
 })
@@ -24,7 +24,7 @@ test('test for gameboard receiveAttack', () => {
 test('test for gameboard checkShipSunk', () => {
     const gameboard = new Gameboard();
     gameboard.createBoard();
-    gameboard.placeShip();   
+    gameboard.placeShipDefault();   
     gameboard.ships.forEach(ship => {
         ship.sunk = true;
     });

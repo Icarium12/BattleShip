@@ -19,12 +19,6 @@ class Node {
         // this.right = null;
 
     }
-
-    // addNeighbor(node) {
-    //     if (!this.neighbors.includes(node)) {
-    //         this.neighbors.push(node);
-    //     }
-    // }
 }
 
 
@@ -58,33 +52,100 @@ export class Gameboard {
             }
         }
 
-        // for (let i = 0; i < cols; x++) {
-        //     for (let j = 0; j < rows; j++) {
-        //         const currentNode = this.board[i][j];
-
-        //         if (i > 0) {
-        //             currentNode.addNeighbor(this.board[i - 1][j]);
-        //             currentNode.down = this.board[i - 1][j];
-        //         }
-        //         if (i < cols - 1) {
-        //             currentNode.addNeighbor(this.board[i+1][j]);
-        //             currentNode.up = this.board[i + 1][j];
-        //         }
-        //         if (j > 0) {
-        //             currentNode.addNeighbor(this.board[i][j-1]);
-        //             currentNode.left = this.board[i][j-1];
-        //         }
-        //         if (j < rows - 1) {
-        //             currentNode.addNeighbor(this.board[i][j+1]);
-        //             currentNode.right = this.board[i][j+1];
-        //         }
-        //     }
-        // }
     }
 
-    
+    placeShip(x, y, length, direction) {
+        this.allSpaces = [];
+        if (length <= 4) {
+            const ship = new Ship(length);
+            if (direction === "vertical") {
+                // check valid placement
+                if (y >= 0 && y + length <= 10 && x > 0 && x < 10) {
+                    // check place down
+                    if (y + length <= 10) {
+                        for (let i = 0; i < length; i++) {
+                            if (i === 0) {
+                                if(this.board[y][x].hasShip === false) {
+                                    this.board[y][x].role = "anchor";
+                                    this.board[y][x].hasShip = true;
+                                    this.board[y][x].value = ship;
+                                    this.board[y][x].allSpaces = [];
+                                    this.board[y][x].allSpaces.push([y, x]);  
+                                }
+                                else {
+                                    return "Invalid Placement";
+                                }
+                                
+                            }
+                            else {
+                                if (this.board[y + 1][x].hasShip === false) {
+                                    this.board[y + 1][x].role = "pointer";
+                                    this.board[y + 1][x].hasShip = true;
+                                    this.board[y + 1][x].value = ship;
+                                    this.board[y + 1][x].allSpaces.push([y + 1, x]);
+                                    y = y +1;    
+                                }
+                                else {
+                                    return "Invalid Placement";
+                                }
+                            }
+                        }
+                
+                    }
+                    else {
+                        return "Not enough space";
+                    }
+                } 
+                else {
+                    return  "Invallid placement";
+                }
+            }
+            else if (direction === "horizontal") {
+                // check valid placement 
+                if (x >= 0 && x + length <= 10 && y >= 0 && y < 10) {
+                    //check right 
+                    if (x + length <= 10) {
+                        for(let i = 0; i < length; i++) {
+                            if (i === 0) {
+                                if (this.board[y][x].hasShip === false) {
+                                    this.board[y][x].role = "anchor";
+                                    this.board[y][x].hasShip = true;
+                                    this.board[y][x].value = ship;
+                                    this.board[y][x].allSpaces.push([y, x]);
+                                }
+                                else {
+                                    return "Invalid Placement";
+                                }
 
-    placeShip() { 
+                            }
+                            else {
+                                if (this.board[y][x+1].hasShip===false) {
+                                    this.board[y][x+1].role = "pointer";
+                                    this.board[y][x+1].hasShip = true;
+                                    this.board[y][x+1].value = ship;
+                                    this.board[y][x+1].allSpaces.push([y, x+1]);
+                                    x = x + 1;
+                                }
+                                else {
+                                    return "Invalid Placement";
+                                }
+                            } 
+                        }
+                
+                    }
+                }
+
+            }
+
+        }
+        else {
+            return "Length is invalid lenght can only be among 1-4";
+        }
+
+
+    }
+
+    placeShipDefault() { 
         const ship1Coords = [
             {r: 0, c: 2},
             {r: 0, c: 3},
