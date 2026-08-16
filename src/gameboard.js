@@ -54,21 +54,21 @@ export class Gameboard {
 
     }
 
-    placeShip(x, y, length, direction) {
+    placeShip(row, col, length, direction) {
         if (length <= 4) {
             const ship = new Ship(length);
             if (direction === "vertical") {
                 // check valid placement
-                if (y >= 0 && y + length <= 10 && x > 0 && x < 10) {
+                if (row >= 0 && row + length <= 10 && col > 0 && col < 10) {
                     // check place down
-                    if (y + length <= 10) {
+                    if (row + length <= 10) {
                         for (let i = 0; i < length; i++) {
                             if (i === 0) {
-                                if(this.board[y][x].hasShip === false) {
-                                    this.board[y][x].role = "anchor";
-                                    this.board[y][x].hasShip = true;
-                                    this.board[y][x].value = ship;
-                                    this.board[y][x].allSpaces.push([y, x]);  
+                                if(this.board[row][col].hasShip === false) {
+                                    this.board[row][col].role = "anchor";
+                                    this.board[row][col].hasShip = true;
+                                    this.board[row][col].value = ship;
+                                    // this.board[row][x].allSpaces.push([row, x]);  
                                 }
                                 else {
                                     return "Invalid Placement";
@@ -76,12 +76,12 @@ export class Gameboard {
                                 
                             }
                             else {
-                                if (this.board[y + 1][x].hasShip === false) {
-                                    this.board[y + 1][x].role = "pointer";
-                                    this.board[y + 1][x].hasShip = true;
-                                    this.board[y + 1][x].value = ship;
-                                    this.board[y + 1][x].allSpaces.push([y + 1, x]);
-                                    y = y +1;    
+                                if (this.board[row + 1][col].hasShip === false) {
+                                    this.board[row + 1][col].role = "pointer";
+                                    this.board[row + 1][col].hasShip = true;
+                                    this.board[row + 1][col].value = ship;
+                                    // this.board[row + 1][x].allSpaces.push([row + 1, x]);
+                                    row = row +1;    
                                 }
                                 else {
                                     return "Invalid Placement";
@@ -100,17 +100,17 @@ export class Gameboard {
             }
             else if (direction === "horizontal") {
                 // check valid placement 
-                if (x >= 0 && x + length <= 10 && y >= 0 && y < 10) {
+                if (col >= 0 && col + length <= 10 && row >= 0 && row < 10) {
                     //check right 
-                    if (x + length <= 10) {
+                    if (col + length <= 10) {
                         for(let i = 0; i < length; i++) {
                             if (i === 0) {
-                                if (this.board[y][x].hasShip === false) {
-                                    this.board[y][x].role = "anchor";
-                                    this.board[y][x].hasShip = true;
-                                    this.board[y][x].value = ship;
-                                    // this.board[y][x].allSpaces = [];
-                                    // this.board[y][x].allSpaces.push([y, x]);
+                                if (this.board[row][col].hasShip === false) {
+                                    this.board[row][col].role = "anchor";
+                                    this.board[row][col].hasShip = true;
+                                    this.board[row][col].value = ship;
+                                    // this.board[row][x].allSpaces = [];
+                                    // this.board[row][x].allSpaces.push([row, x]);
                                 }
                                 else {
                                     return "Invalid Placement";
@@ -118,12 +118,12 @@ export class Gameboard {
 
                             }
                             else {
-                                if (this.board[y][x+1].hasShip===false) {
-                                    this.board[y][x+1].role = "pointer";
-                                    this.board[y][x+1].hasShip = true;
-                                    this.board[y][x+1].value = ship;
-                                    // this.board[y][x+1].allSpaces.push([y, x+1]);
-                                    x = x + 1;
+                                if (this.board[row][col+1].hasShip===false) {
+                                    this.board[row][col+1].role = "pointer";
+                                    this.board[row][col+1].hasShip = true;
+                                    this.board[row][col+1].value = ship;
+                                    // this.board[row][x+1].allSpaces.push([row, x+1]);
+                                    col = col + 1;
                                 }
                                 else {
                                     return "Invalid Placement";
@@ -138,7 +138,7 @@ export class Gameboard {
 
         }
         else {
-            return "Length is invalid lenght can only be among 1-4";
+            return "Length is invalid lenght can onlrow be among 1-4";
         }
 
 
