@@ -55,7 +55,6 @@ export class Gameboard {
     }
 
     placeShip(x, y, length, direction) {
-        this.allSpaces = [];
         if (length <= 4) {
             const ship = new Ship(length);
             if (direction === "vertical") {
@@ -69,7 +68,6 @@ export class Gameboard {
                                     this.board[y][x].role = "anchor";
                                     this.board[y][x].hasShip = true;
                                     this.board[y][x].value = ship;
-                                    this.board[y][x].allSpaces = [];
                                     this.board[y][x].allSpaces.push([y, x]);  
                                 }
                                 else {
@@ -97,7 +95,7 @@ export class Gameboard {
                     }
                 } 
                 else {
-                    return  "Invallid placement";
+                    return  "Invallid Placement";
                 }
             }
             else if (direction === "horizontal") {
@@ -111,7 +109,8 @@ export class Gameboard {
                                     this.board[y][x].role = "anchor";
                                     this.board[y][x].hasShip = true;
                                     this.board[y][x].value = ship;
-                                    this.board[y][x].allSpaces.push([y, x]);
+                                    // this.board[y][x].allSpaces = [];
+                                    // this.board[y][x].allSpaces.push([y, x]);
                                 }
                                 else {
                                     return "Invalid Placement";
@@ -123,7 +122,7 @@ export class Gameboard {
                                     this.board[y][x+1].role = "pointer";
                                     this.board[y][x+1].hasShip = true;
                                     this.board[y][x+1].value = ship;
-                                    this.board[y][x+1].allSpaces.push([y, x+1]);
+                                    // this.board[y][x+1].allSpaces.push([y, x+1]);
                                     x = x + 1;
                                 }
                                 else {

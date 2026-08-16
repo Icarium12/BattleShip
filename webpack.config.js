@@ -1,5 +1,6 @@
 import path from "node:path";
 import test from "node:test";
+import HtmlWebpackPlugin from "html-webpack-plugin";
 
 export default {
     mode: "development",
@@ -9,6 +10,15 @@ export default {
         path: path.resolve(import.meta.dirname, "dist"),
         clean: true,
     },
+    devtool: "eval-source-map",
+    devServer: {
+        watchFiles: ["./src/index.html"],
+    },
+    plugins: [
+        new HtmlWebpackPlugin({
+            template: "./src/index.html",
+        }),
+    ],
     module: {
         rules: [
             {

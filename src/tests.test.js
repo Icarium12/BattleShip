@@ -31,3 +31,10 @@ test('test for gameboard checkShipSunk', () => {
     expect(gameboard.checkShipSunk()).toBe("All ships sunk; You have won");
 
 })
+
+test('test for placeship on gameboard', () => {
+    const gameboard = new Gameboard();
+    gameboard.createBoard();
+    gameboard.placeShip(0, 0, 4, "horizontal");
+    expect(gameboard.board[0][0].role).toBe('anchor');
+})
