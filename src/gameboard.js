@@ -132,6 +132,9 @@ export class Gameboard {
                         }
                 
                     }
+                    else {
+                        return "Not enough space";
+                    }
                 }
 
             }
