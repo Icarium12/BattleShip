@@ -1,8 +1,9 @@
 import { Player } from "./player";
+import { playerCont } from ".";
 
-export function renderBoard(gameboard) {
-    const container = document.createElement('div');
-    container.className = "gameboard";
+export function renderBoard(gameboard, container) {
+    const boardCont = document.createElement('div');
+    boardCont.className = "gameboard";
     let boardArray;
     if (gameboard && gameboard.board) {
         boardArray = gameboard.board;
@@ -20,10 +21,32 @@ export function renderBoard(gameboard) {
             else {
                 square.style.border = "1px solid black";
             }
-            container.append(square);
+            boardCont.append(square);
         }
     }
-    document.body.append(container);
+    container.append(boardCont);
+    // document.body.append(container);
+}
+
+export function renderOppBoard(gameboard, container) {
+    const boardCont = document.createElement('div');
+    boardCont.className = "gameboard";    
+    let boardArray;
+    if (gameboard && gameboard.board) {
+        boardArray = gameboard.board;
+    } else {
+        boardArray = gameboard;
+    }
+    if (!boardArray || !boardArray.length) return;
+    for (let i = 0; i < boardArray.length; i++) {
+        for (let j = 0; j < boardArray[i].length; j++) {
+            const square = document.createElement('div');
+            square.className = 'square';
+            square.style.border = "1px solid black";
+            boardCont.append(square);
+        }
+    } 
+    container.append(boardCont);
 }
 
 export function createPlayer(container) {
@@ -65,7 +88,11 @@ export function createPlayer(container) {
         dialog.close();
         const player = new Player(playerType.value, input.value);
         player.playerBoard.createBoard();
-        renderBoard(player.playerBoard);
+        renderBoard(player.playerBoard, playerCont);
+
+        const computer = new Player('computer', 'computer');
+        computer.playerBoard.createBoard();
+        renderBoard(computer.playerBoard, playerCont);
 
     });
     form.appendChild(button);

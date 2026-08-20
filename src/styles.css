@@ -4,10 +4,16 @@
     grid-template-rows: repeat(10, 1fr);
     gap: 0;
     border: 1px solid black;
-    width: 540px;
+    width: 400px;
+    height: 400px;
 }
 
 .square {
-    height: 50px;
-    width: 50px;
+    box-sizing: border-box;
+}
+
+.player-cont {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
 }
