@@ -46,10 +46,11 @@ export class Gameboard {
         let cols = 10;
 
         for (let i = 0; i<rows; i++) {
-            this.board[i] = [];
+            const row = [];
             for (let j = 0; j < cols; j++) {
-                this.board[i][j] = new Node(i, j);
+            row.push(new Node(i, j));
             }
+            this.board.push(row);
         }
 
     }

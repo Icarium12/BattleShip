@@ -1,11 +1,20 @@
+import { Player } from "./player";
+
 export function renderBoard(gameboard) {
     const container = document.createElement('div');
-    container.className = "gameboard"
-    for (let i = 0; i < 10; i++) {
-        for (let j = 0; j < 10; j++) {
+    container.className = "gameboard";
+    let boardArray;
+    if (gameboard && gameboard.board) {
+        boardArray = gameboard.board;
+    } else {
+        boardArray = gameboard;
+    }
+    if (!boardArray || !boardArray.length) return;
+    for (let i = 0; i < boardArray.length; i++) {
+        for (let j = 0; j < boardArray[i].length; j++) {
             const square = document.createElement('div');
             square.className = 'square';
-            if (gameboard[i][j].hasShip === true) {
+            if (boardArray[i][j].hasShip === true) {
                 square.style.border = "2px solid red";
             }
             else {
@@ -17,7 +26,9 @@ export function renderBoard(gameboard) {
     document.body.append(container);
 }
 
-export function createPlayer() {
+export function createPlayer(container) {
+    // const container = document.createElement('div');
+    // container.className = "create-player";
     const dialog = document.createElement('dialog');
     const form = document.createElement('form');
     form.className = "playerForm";
@@ -49,6 +60,14 @@ export function createPlayer() {
 
     const button = document.createElement('button');
     button.textContent = "Submit";
+    button.type = "button";
+    button.addEventListener('click', () => {
+        dialog.close();
+        const player = new Player(playerType.value, input.value);
+        player.playerBoard.createBoard();
+        renderBoard(player.playerBoard);
+
+    });
     form.appendChild(button);
     dialog.appendChild(form);
     document.body.append(dialog);

@@ -9,14 +9,31 @@ const title = document.createElement('div');
 title.textContent = "BattleShip Game"; 
 body.append(title);
 
-const button = document.createElement('button');
-button.textContent = "Create Player";
-button.addEventListener('click', () => {
-    createPlayer();
-})
-body.appendChild(button);
+const playerCont = document.createElement('div');
+playerCont.className = "player-cont";
+
+
+
+const button1 = document.createElement('button');
+button1.textContent = "Create Player1";
+button1.addEventListener('click', () => {
+    const player = createPlayer(playerCont);
+});
+body.appendChild(button1);
+
 
 const board = new Gameboard();
 board.createBoard();
-board.placeShipDefault();
-renderBoard(board.board);
+console.log(board.board[0][0]);
+// board.placeShipDefault();
+// renderBoard(board.board);
+
+const player1 = new Player("user", "p1");
+player1.playerBoard.createBoard();
+console.log(player1.playerBoard.board[0][0]);
+renderBoard(player1.playerBoard);
+
+function runGame () {
+
+    
+}
