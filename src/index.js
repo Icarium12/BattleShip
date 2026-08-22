@@ -19,6 +19,13 @@ body.appendChild(button1);
 export const playerCont = document.createElement('div');
 playerCont.className = "player-cont";
 
+export const playerBoardCont = document.createElement('div');
+
+export const oppBoardCont = document.createElement('div');
+
+playerCont.appendChild(playerBoardCont);
+playerCont.appendChild(oppBoardCont);
+
 body.appendChild(playerCont);
 
 
