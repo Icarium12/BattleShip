@@ -292,8 +292,8 @@ export class Gameboard {
         });
 
         const ship8Coords = [
-            {r: 5, c: 1},
-            {r: 6, c: 1}
+            {r: 2, c: 3},
+            {r: 3, c: 3}
         ];
 
         ship8Coords.forEach((coord, index) => {
@@ -375,6 +375,8 @@ export class Gameboard {
         });
         if (sunkCount === 10) {
             return "All ships sunk; You have won";
+        } else {
+            return null;
         }
     }
     

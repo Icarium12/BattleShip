@@ -13,7 +13,7 @@ const button1 = document.createElement('button');
 button1.textContent = "Create Player";
 button1.addEventListener('click', () => {
     const player = createPlayer(playerCont);
-});
+}, { once: true});
 body.appendChild(button1);
 
 export const playerCont = document.createElement('div');
@@ -22,6 +22,9 @@ playerCont.className = "player-cont";
 export const playerBoardCont = document.createElement('div');
 
 export const oppBoardCont = document.createElement('div');
+export const winPopup = document.createElement('div');
+winPopup.textContent = "You win";
+winPopup.className = "popup-overlay";
 
 playerCont.appendChild(playerBoardCont);
 playerCont.appendChild(oppBoardCont);

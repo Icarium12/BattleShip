@@ -1,5 +1,5 @@
 import { Player } from "./player";
-import { playerCont, playerBoardCont, oppBoardCont } from ".";
+import { playerCont, playerBoardCont, oppBoardCont, winPopup } from ".";
 
 export function renderBoard(gameboard, container, boardCont) {
     // const boardCont = document.createElement('div');
@@ -76,47 +76,50 @@ function hit(x, y, gameboard) {
     gameboard.receiveAttack(x, y);
 }
 
-function computerMove (gameboard, boardCont, oppBoardCont) {
-    let boardArray;
-    if (gameboard && gameboard.board) {
-        boardArray = gameboard.board;
-    } else {
-        boardArray = gameboard;
-    }
-
-    const squares = oppBoardCont.childNodes;
-    let coord;
-    const x = Math.floor(Math.random() * 10);
-    const y = Math.floor(Math.random() * 10);
-    
-    squares.forEach(square => {
-        const coordString = square.dataset.myArray;
-        coord = JSON.parse(coordString);
-        const x2 = coord[0];
-        const y2 = coord[1];
-        if (x === x2 && y === y2) {
-            if (boardArray[x][y].hit === true) {
-                computerMove(gameboard, boardCont, oppBoardCont);
-            }
-            else if (boardArray[x][y].hasShip === true && boardArray[x][y].hit === false) { 
-                hit(x, y, gameboard);
-                square.textContent = "X";
-                setTimeout(() => {
-                    computerMove(gameboard, boardCont, oppBoardCont);
-                }, 3000);
-                
-            }
-            else if (boardArray[x][y].hasShip === false && boardArray[x][y].hit === false) {
-                hit(x, y, gameboard);
-                square.textContent = ".";
-                oppBoardCont.style.backgroundColor = "#f5f5f5";
-                boardCont.style.backgroundColor = "#ffffff";
-                // activePlayer = 1;
-                // boardOwner = 2;
-                return;
-            }
+function computerMove (gameboard, boardCont, oppBoardCont, gameState) {
+    if (gameState.activePlayer === 2 && gameState.boardOwner === 1) {
+        let boardArray;
+        if (gameboard && gameboard.board) {
+            boardArray = gameboard.board;
+        } else {
+            boardArray = gameboard;
         }
-    }) 
+
+        const squares = oppBoardCont.childNodes;
+        let coord;
+        const x = Math.floor(Math.random() * 10);
+        const y = Math.floor(Math.random() * 10);
+        
+        squares.forEach(square => {
+            const coordString = square.dataset.myArray;
+            coord = JSON.parse(coordString);
+            const x2 = coord[0];
+            const y2 = coord[1];
+            if (x === x2 && y === y2) {
+                if (boardArray[x][y].hit === true) {
+                    computerMove(gameboard, boardCont, oppBoardCont);
+                }
+                else if (boardArray[x][y].hasShip === true && boardArray[x][y].hit === false) { 
+                    hit(x, y, gameboard);
+                    square.textContent = "X";
+                    setTimeout(() => {
+                        computerMove(gameboard, boardCont, oppBoardCont, gameState);
+                    }, 3000);
+                    
+                }
+                else if (boardArray[x][y].hasShip === false && boardArray[x][y].hit === false) {
+                    hit(x, y, gameboard);
+                    square.textContent = ".";
+                    oppBoardCont.style.backgroundColor = "#f5f5f5";
+                    boardCont.style.backgroundColor = "#ffffff";
+                    gameState.activePlayer = 1;
+                    gameState.boardOwner = 2;
+                    return;
+                }
+            }
+        })
+    }
+     
 }
 
 export function createPlayer(container) {
@@ -163,22 +166,24 @@ export function createPlayer(container) {
         renderBoard(player.playerBoard, playerCont, playerBoardCont);
 
         // Receiving attack
-        let activePlayer = 1;
-        let boardOwner = 2;
+        const gameState = {
+            activePlayer: 1,
+            boardOwner: 2,
+        }
         playerBoardCont.style.backgroundColor =  "#f5f5f5";
         const squares = playerBoardCont.childNodes;
         squares.forEach(square => {
             square.addEventListener('click', () => {
-                if (activePlayer === 2 && boardOwner === 1) {
-                    activePlayer = 1;
-                    boardOwner = 2;
+                if (gameState.activePlayer === 2 && gameState.boardOwner === 1) {
+                    gameState.activePlayer = 1;
+                    gameState.boardOwner = 2;
                     const coordString = square.dataset.myArray;
                     const coord = JSON.parse(coordString);
                     hit(coord[0], coord[1], player.playerBoard);
                     if (player.playerBoard.board[coord[0]][coord[1]].hit === true && player.playerBoard.board[coord[0]][coord[1]].hasShip === true) {
                         square.textContent = "X";
-                        activePlayer = 2;
-                        boardOwner = 1;
+                        gameState.activePlayer = 2;
+                        gameState.boardOwner = 1;
                         return;
                     }
                     else if(player.playerBoard.board[coord[0]][coord[1]].hit === true && player.playerBoard.board[coord[0]][coord[1]].hasShip === false) {
@@ -198,41 +203,49 @@ export function createPlayer(container) {
         computer.playerBoard.placeShipDefault();
         renderOppBoard(computer.playerBoard, playerCont, oppBoardCont);
         
-        // Potential groundwork for 2 player option;
+        
+
         const oppSquares = oppBoardCont.childNodes;
         oppSquares.forEach(square => {
             square.addEventListener('click', () => {
-                if (activePlayer === 1 && boardOwner === 2) {
-                    activePlayer = 2;
-                    boardOwner = 1;
+                if (gameState.activePlayer === 1 && gameState.boardOwner === 2) {
+                    gameState.activePlayer = 2;
+                    gameState.boardOwner = 1;
                     const coordString = square.dataset.myArray;
                     const coord = JSON.parse(coordString);
                     hit(coord[0], coord[1], computer.playerBoard);
                     if(computer.playerBoard.board[coord[0]][coord[1]].hit === true && computer.playerBoard.board[coord[0]][coord[1]].hasShip === true) {
                         console.log(computer.playerBoard.board[coord[0]][coord[1]].value);
-                        activePlayer = 1;
-                        boardOwner = 2;
+                        gameState.activePlayer = 1;
+                        gameState.boardOwner = 2;
                         square.textContent = "X";
                         square.style.border = "2px solid red";
                         return;
                     }
                     else if(computer.playerBoard.board[coord[0]][coord[1]].hit === true && computer.playerBoard.board[coord[0]][coord[1]].hasShip === false) {
-                        activePlayer = 1;
-                        boardOwner = 2;
+                        // activePlayer = 2;
+                        // boardOwner = 1;
                         square.textContent = ".";
-                    }
-                    oppBoardCont.style.backgroundColor = "#f5f5f5";
-                    playerBoardCont.style.backgroundColor = "#ffffff"; 
-                    
-                    
+                        oppBoardCont.style.backgroundColor = "#f5f5f5";
+                        playerBoardCont.style.backgroundColor = "#ffffff";
+                    }  
                 }
                 setTimeout(() => {
-                    computerMove(player.playerBoard, oppBoardCont, playerBoardCont);
-                }, 3000);
+                    computerMove(player.playerBoard, oppBoardCont, playerBoardCont, gameState);
+                }, 2000);
+                
                 // computerMove(player.playerBoard, square, playerBoardCont);
             }, { once: true});
         });
 
+        oppBoardCont.addEventListener('click', () => {
+            let win = computer.playerBoard.checkShipSunk();
+                if (win !== null) {
+                    winPopup.classList.add('show');
+                    oppBoardCont.appendChild(winPopup);
+                    oppBoardCont.style.pointerEvents = 'none';
+                }
+        })
     });
     form.appendChild(button);
     dialog.appendChild(form);
