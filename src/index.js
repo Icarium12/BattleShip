@@ -19,6 +19,9 @@ body.appendChild(button1);
 export const playerCont = document.createElement('div');
 playerCont.className = "player-cont";
 
+export const shipCont = document.createElement('div');
+shipCont.className = "ships";
+
 export const playerBoardCont = document.createElement('div');
 
 export const oppBoardCont = document.createElement('div');
@@ -26,6 +29,7 @@ export const winPopup = document.createElement('div');
 winPopup.textContent = "You win";
 winPopup.className = "popup-overlay";
 
+playerCont.appendChild(shipCont);
 playerCont.appendChild(playerBoardCont);
 playerCont.appendChild(oppBoardCont);
 

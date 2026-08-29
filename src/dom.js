@@ -1,5 +1,5 @@
 import { Player } from "./player";
-import { playerCont, playerBoardCont, oppBoardCont, winPopup } from ".";
+import { playerCont, playerBoardCont, oppBoardCont, winPopup, shipCont } from ".";
 
 export function renderBoard(gameboard, container, boardCont) {
     // const boardCont = document.createElement('div');
@@ -72,6 +72,25 @@ export function renderOppBoard(gameboard, container, boardCont) {
     // container.append(boardCont);
 }
 
+function renderShips(gameboard, cont) {
+    gameboard.ships.forEach(ship => {
+        const length = ship.length;
+        const shipCont = document.createElement('div');
+        shipCont.className = "ship-holder";
+        for (let i = 0; i < length; i++) {
+            const shipSq = document.createElement('div');
+            shipSq.className = "ship";
+            shipSq.dataset.value = ship;
+            shipCont.appendChild(shipSq);
+
+            cont.appendChild(shipCont);
+        }
+        const placeShip = document.createElement('button');
+        placeShip.textContent = "Place Ship";
+        shipCont.appendChild(placeShip);
+    })
+}
+
 function hit(x, y, gameboard) {
     gameboard.receiveAttack(x, y);
 }
@@ -97,14 +116,14 @@ function computerMove (gameboard, boardCont, oppBoardCont, gameState) {
             const y2 = coord[1];
             if (x === x2 && y === y2) {
                 if (boardArray[x][y].hit === true) {
-                    computerMove(gameboard, boardCont, oppBoardCont);
+                    computerMove(gameboard, boardCont, oppBoardCont, gameState);
                 }
                 else if (boardArray[x][y].hasShip === true && boardArray[x][y].hit === false) { 
                     hit(x, y, gameboard);
                     square.textContent = "X";
                     setTimeout(() => {
                         computerMove(gameboard, boardCont, oppBoardCont, gameState);
-                    }, 3000);
+                    }, 1000);
                     
                 }
                 else if (boardArray[x][y].hasShip === false && boardArray[x][y].hit === false) {
@@ -118,6 +137,15 @@ function computerMove (gameboard, boardCont, oppBoardCont, gameState) {
                 }
             }
         })
+
+        let win = gameboard.checkShipSunk();
+        if (win != null) {
+            winPopup.style.color = "red";
+            winPopup.textContent = "You lose";
+            winPopup.classList.add('show');
+            playerCont.appendChild(winPopup);
+            playerCont.style.pointerEvents = 'none';
+        }
     }
      
 }
@@ -163,6 +191,7 @@ export function createPlayer(container) {
         const player = new Player(playerType.value, input.value);
         player.playerBoard.createBoard();
         player.playerBoard.placeShipDefault();
+        renderShips(player.playerBoard, shipCont);
         renderBoard(player.playerBoard, playerCont, playerBoardCont);
 
         // Receiving attack
@@ -232,7 +261,7 @@ export function createPlayer(container) {
                 }
                 setTimeout(() => {
                     computerMove(player.playerBoard, oppBoardCont, playerBoardCont, gameState);
-                }, 2000);
+                }, 1000);
                 
                 // computerMove(player.playerBoard, square, playerBoardCont);
             }, { once: true});
@@ -242,8 +271,8 @@ export function createPlayer(container) {
             let win = computer.playerBoard.checkShipSunk();
                 if (win !== null) {
                     winPopup.classList.add('show');
-                    oppBoardCont.appendChild(winPopup);
-                    oppBoardCont.style.pointerEvents = 'none';
+                    playerCont.appendChild(winPopup);
+                    playerCont.style.pointerEvents = 'none';
                 }
         })
     });

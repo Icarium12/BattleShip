@@ -35,6 +35,6 @@ test('test for gameboard checkShipSunk', () => {
 test('test for placeship on gameboard', () => {
     const gameboard = new Gameboard();
     gameboard.createBoard();
-    gameboard.placeShip(0, 0, 4, "horizontal");
+    gameboard.placeShip(gameboard.ship7, 0, 0, "horizontal");
     expect(gameboard.board[0][0].role).toBe('anchor');
 })

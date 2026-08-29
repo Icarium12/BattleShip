@@ -55,94 +55,82 @@ export class Gameboard {
 
     }
 
-    placeShip(row, col, length, direction) {
-        if (length <= 4) {
-            const ship = new Ship(length);
-            if (direction === "vertical") {
-                // check valid placement
-                if (row >= 0 && row + length <= 10 && col > 0 && col < 10) {
-                    // check place down
-                    if (row + length <= 10) {
-                        for (let i = 0; i < length; i++) {
-                            if (i === 0) {
-                                if(this.board[row][col].hasShip === false) {
-                                    this.board[row][col].role = "anchor";
-                                    this.board[row][col].hasShip = true;
-                                    this.board[row][col].value = ship;
-                                    // this.board[row][x].allSpaces.push([row, x]);  
-                                }
-                                else {
-                                    return "Invalid Placement";
-                                }
-                                
+    placeShip(ship, x, y, direction) {
+        if(this.board[x][y].hasShip === true) {
+            return "Invalid position";
+        }
+        else {
+            const lenght =  ship.length;
+            if (direction === 'vertical') {
+                // check valid vertical placement
+                if (x >= 0 && x + lenght <= 10 && y > 0 && y < 10) {
+                    const changeSpots = [];
+
+                    for (let i = 0; i < lenght; i++) {
+                        if (i === 0) {
+                            this.board[x][y].role = "anchor";
+                            this.board[x][y].hasShip = true;
+                            this.board[x][y].value = ship;
+                            changeSpots.push([x, y]);
+                        }
+                        else {
+                            if(this.board[x + 1][y].hasShip === false) {
+                                this.board[x + 1][y].role = "pointer";
+                                this.board[x + 1][y].hasShip = true;
+                                this.board[x + 1][y].value = ship;
+                                changeSpots.push([x+1, y]);
+                                x += 1;
                             }
                             else {
-                                if (this.board[row + 1][col].hasShip === false) {
-                                    this.board[row + 1][col].role = "pointer";
-                                    this.board[row + 1][col].hasShip = true;
-                                    this.board[row + 1][col].value = ship;
-                                    // this.board[row + 1][x].allSpaces.push([row + 1, x]);
-                                    row = row +1;    
-                                }
-                                else {
-                                    return "Invalid Placement";
-                                }
+                                changeSpots.forEach(spot => {
+                                    this.board[spot[0]][spot[1]].hasShip = false;
+                                    this.board[spot[0]][spot[1]].role = null;
+                                    this.board[spot[0]][spot[1]].value = null;
+                                });
+                                return "Invalid postion";
                             }
                         }
-                
-                    }
-                    else {
-                        return "Not enough space";
                     }
                 } 
                 else {
-                    return  "Invallid Placement";
+                    return "Invalid position";
                 }
             }
             else if (direction === "horizontal") {
-                // check valid placement 
-                if (col >= 0 && col + length <= 10 && row >= 0 && row < 10) {
-                    //check right 
-                    if (col + length <= 10) {
-                        for(let i = 0; i < length; i++) {
-                            if (i === 0) {
-                                if (this.board[row][col].hasShip === false) {
-                                    this.board[row][col].role = "anchor";
-                                    this.board[row][col].hasShip = true;
-                                    this.board[row][col].value = ship;
-                                    // this.board[row][x].allSpaces = [];
-                                    // this.board[row][x].allSpaces.push([row, x]);
-                                }
-                                else {
-                                    return "Invalid Placement";
-                                }
+                // check horizontal postion
+                if (y >= 0 && y + lenght <= 10 && x >= 0 && x < 10) {
+                    const changeSpots = [];
 
+                    for(let i = 0; i < lenght; i++) {
+                        if (i === 0) {
+                            this.board[x][y].role = "anchor";
+                            this.board[x][y].hasShip = true;
+                            this.board[x][y].value = ship;
+                            changeSpots.push([x, y]);
+                        }
+                        else {
+                            if (this.board[x][y+1].hasShip === false) {
+                                this.board[x][y+1].role = "pointer";
+                                this.board[x][y+1].hasShip = true;
+                                this.board[x][y+1].value = ship;
+                                changeSpots.push([x, y+1]);
+                                y +=1;
                             }
                             else {
-                                if (this.board[row][col+1].hasShip===false) {
-                                    this.board[row][col+1].role = "pointer";
-                                    this.board[row][col+1].hasShip = true;
-                                    this.board[row][col+1].value = ship;
-                                    // this.board[row][x+1].allSpaces.push([row, x+1]);
-                                    col = col + 1;
-                                }
-                                else {
-                                    return "Invalid Placement";
-                                }
-                            } 
+                                changeSpots.forEach(spot => {
+                                    this.board[spot[0]][spot[1]].hasShip = false;
+                                    this.board[spot[0]][spot[1]].role = null;
+                                    this.board[spot[0]][spot[1]].value = null;
+                                });
+                                return "Invalid postion";
+                            }
                         }
-                
                     }
-                    else {
-                        return "Not enough space";
-                    }
+                } 
+                else {
+                    return "Invalid Position";
                 }
-
             }
-
-        }
-        else {
-            return "Length is invalid lenght can onlrow be among 1-4";
         }
 
 
