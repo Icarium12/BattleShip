@@ -63,7 +63,7 @@ export class Gameboard {
             const lenght =  ship.length;
             if (direction === 'vertical') {
                 // check valid vertical placement
-                if (x >= 0 && x + lenght <= 10 && y > 0 && y < 10) {
+                if (x >= 0 && x + lenght <= 10 && y >= 0 && y < 10) {
                     const changeSpots = [];
 
                     for (let i = 0; i < lenght; i++) {
@@ -128,7 +128,7 @@ export class Gameboard {
                     }
                 } 
                 else {
-                    return "Invalid Position";
+                    return "Invalid position";
                 }
             }
         }

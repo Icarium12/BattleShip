@@ -2,7 +2,7 @@ import { Player } from "./player";
 import { playerCont, playerBoardCont, oppBoardCont, winPopup, shipCont } from ".";
 
 export function renderBoard(gameboard, container, boardCont) {
-    // const boardCont = document.createElement('div');
+    boardCont.replaceChildren();
     boardCont.className = "gameboard";
     let boardArray;
     if (gameboard && gameboard.board) {
@@ -73,6 +73,8 @@ export function renderOppBoard(gameboard, container, boardCont) {
 }
 
 function renderShips(gameboard, cont) {
+    
+
     gameboard.ships.forEach(ship => {
         const length = ship.length;
         const shipCont = document.createElement('div');
@@ -85,9 +87,98 @@ function renderShips(gameboard, cont) {
 
             cont.appendChild(shipCont);
         }
+
+        const dialog =  document.createElement('dialog');
+
+        const shipCont2 = shipCont.cloneNode(true);
+
+        dialog.appendChild(shipCont2);
+
+        const label = document.createElement('label');
+        label.textContent = "Change ship orientation: ";
+        dialog.appendChild(label);
+
+        const shipDirection = document.createElement('select');
+        shipDirection.name = "set-ship-direction";
+
+        const option1 = document.createElement('option');
+        option1.value = "horizontal";
+        option1.textContent = "horizontal";
+        shipDirection.appendChild(option1);
+
+        const option2 = document.createElement('option');
+        option2.value = "vertical";
+        option2.textContent = "vertical";
+        shipDirection.appendChild(option2);
+
+        shipDirection.addEventListener('change', () => {
+            if (shipDirection.value === "vertical") {
+                shipCont2.style.flexDirection = "column";
+            }
+            else if (shipDirection.value === "horizontal") {
+                shipCont2.style.flexDirection = "row";
+            }
+        })
+        dialog.appendChild(shipDirection);
+
+        const boardCont = document.createElement('div');
+        boardCont.className = "place-ship-board";
+        renderBoard(gameboard, cont, boardCont);
+        dialog.appendChild(boardCont);
+
+        const setShip = document.createElement('button');
+        setShip.type = "button";
+        setShip.textContent = "Confirm Placement";
+        setShip.addEventListener('click', () => {
+            dialog.close();
+            shipCont.remove();
+            renderBoard(gameboard, cont, playerBoardCont);
+        })
+        dialog.appendChild(setShip);
+
+        document.body.appendChild(dialog);
+
         const placeShip = document.createElement('button');
         placeShip.textContent = "Place Ship";
+        placeShip.addEventListener('click', () => {
+            renderBoard(gameboard, cont, boardCont);
+            const squares = boardCont.childNodes;
+            squares.forEach(square => {
+            square.addEventListener('click', () => {
+                console.log("clicked");
+                const coordString = square.dataset.myArray;
+                const coord = JSON.parse(coordString);
+                const x = coord[0];
+                const y = coord[1];
+                const direction = shipDirection.value;
+                const validPlacement = gameboard.placeShip(ship, x, y, direction);
+
+                if (validPlacement === "Invalid position") {
+                    console.log("not placed");
+                    alert(validPlacement);
+                    
+                }
+                else {
+                    console.log("placed");
+                    renderBoard(gameboard, cont, boardCont);
+                    renderBoard(gameboard, cont, playerBoardCont); 
+                }
+
+                })
+            })
+            dialog.showModal();
+            
+        })
         shipCont.appendChild(placeShip);
+    })
+}
+
+function waitForClick(element) {
+    return new Promise(resolve => {
+        element.addEventListener('click', function handler() {
+            element.removeEventListener('click', handler);
+            resolve();
+        })
     })
 }
 
@@ -190,7 +281,7 @@ export function createPlayer(container) {
 
         const player = new Player(playerType.value, input.value);
         player.playerBoard.createBoard();
-        player.playerBoard.placeShipDefault();
+        // player.playerBoard.placeShipDefault();
         renderShips(player.playerBoard, shipCont);
         renderBoard(player.playerBoard, playerCont, playerBoardCont);
 
