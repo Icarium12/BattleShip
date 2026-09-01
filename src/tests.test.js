@@ -38,3 +38,11 @@ test('test for placeship on gameboard', () => {
     gameboard.placeShip(gameboard.ship7, 0, 0, "horizontal");
     expect(gameboard.board[0][0].role).toBe('anchor');
 })
+
+test('test for removeship on gameboard', () => {
+    const gameboard = new Gameboard();
+    gameboard.createBoard();
+    gameboard.placeShip(gameboard.ship7, 0, 0, "horizontal");
+    gameboard.removeShip(gameboard.ship7);
+    expect(gameboard.board[0][0].role).toBe(null); 
+})

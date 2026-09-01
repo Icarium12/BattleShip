@@ -9,7 +9,7 @@ class Node {
         this.hasShip = false
         this.value = null;
         this.role = null;
-        this.allSpaces = null;
+        this.allSpaces = [];
         this.anchorTo = null;
         this.hit = false;
         // this.neighbors = [];
@@ -91,6 +91,10 @@ export class Gameboard {
                             }
                         }
                     }
+
+                    changeSpots.forEach(spot => {
+                        ship.coords.push(spot);
+                    })
                 } 
                 else {
                     return "Invalid position";
@@ -126,6 +130,10 @@ export class Gameboard {
                             }
                         }
                     }
+
+                    changeSpots.forEach(spot => {
+                        ship.coords.push(spot);
+                    })
                 } 
                 else {
                     return "Invalid position";
@@ -134,6 +142,14 @@ export class Gameboard {
         }
 
 
+    }
+
+    removeShip(ship) {
+        ship.coords.forEach(coord => {
+            this.board[coord[0]][coord[1]].hasShip = false;
+            this.board[coord[0]][coord[1]].role = null;
+            this.board[coord[0]][coord[1]].value = null;
+        })
     }
 
     placeShipDefault() { 
