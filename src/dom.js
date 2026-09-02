@@ -74,7 +74,13 @@ export function renderOppBoard(gameboard, container, boardCont) {
 
 function renderShips(gameboard, cont) {
     
-
+    const random = document.createElement('button');
+    random.textContent = "Randomize Placement";
+    random.addEventListener('click', () => {
+        gameboard.placeShipRandom();
+        renderBoard(gameboard, cont, playerBoardCont);
+    })
+    cont.appendChild(random);
     gameboard.ships.forEach(ship => {
         const length = ship.length;
         const shipCont = document.createElement('div');
@@ -87,6 +93,8 @@ function renderShips(gameboard, cont) {
 
             cont.appendChild(shipCont);
         }
+
+        
 
         const dialog =  document.createElement('dialog');
 
@@ -136,40 +144,54 @@ function renderShips(gameboard, cont) {
         })
         dialog.appendChild(setShip);
 
+        const removeShip = document.createElement('button');
+        removeShip.type = "button";
+        removeShip.textContent = "Remove ship";
+        removeShip.addEventListener('click', () => {
+            gameboard.removeShip(ship);
+            renderBoard(gameboard, cont, boardCont);
+            squareClicks(boardCont, gameboard, ship, shipDirection, cont);
+        })
+        dialog.appendChild(removeShip);
+
         document.body.appendChild(dialog);
 
         const placeShip = document.createElement('button');
         placeShip.textContent = "Place Ship";
         placeShip.addEventListener('click', () => {
             renderBoard(gameboard, cont, boardCont);
-            const squares = boardCont.childNodes;
-            squares.forEach(square => {
-            square.addEventListener('click', () => {
-                console.log("clicked");
-                const coordString = square.dataset.myArray;
-                const coord = JSON.parse(coordString);
-                const x = coord[0];
-                const y = coord[1];
-                const direction = shipDirection.value;
-                const validPlacement = gameboard.placeShip(ship, x, y, direction);
-
-                if (validPlacement === "Invalid position") {
-                    console.log("not placed");
-                    alert(validPlacement);
-                    
-                }
-                else {
-                    console.log("placed");
-                    renderBoard(gameboard, cont, boardCont);
-                    renderBoard(gameboard, cont, playerBoardCont); 
-                }
-
-                })
-            })
+            squareClicks(boardCont, gameboard, ship, shipDirection, cont);
             dialog.showModal();
             
         })
         shipCont.appendChild(placeShip);
+    })
+}
+
+function squareClicks(boardCont, gameboard, ship, shipDirection, cont) {
+    const squares = boardCont.childNodes;
+    squares.forEach(square => {
+    square.addEventListener('click', () => {
+        console.log("clicked");
+        const coordString = square.dataset.myArray;
+        const coord = JSON.parse(coordString);
+        const x = coord[0];
+        const y = coord[1];
+        const direction = shipDirection.value;
+        const validPlacement = gameboard.placeShip(ship, x, y, direction);
+
+        if (validPlacement === "Invalid position") {
+            console.log("not placed");
+            alert(validPlacement);
+            
+        }
+        else {
+            console.log("placed");
+            renderBoard(gameboard, cont, boardCont);
+            renderBoard(gameboard, cont, playerBoardCont); 
+        }
+
+        })
     })
 }
 

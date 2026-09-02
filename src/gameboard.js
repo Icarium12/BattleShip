@@ -87,7 +87,7 @@ export class Gameboard {
                                     this.board[spot[0]][spot[1]].role = null;
                                     this.board[spot[0]][spot[1]].value = null;
                                 });
-                                return "Invalid postion";
+                                return "Invalid position";
                             }
                         }
                     }
@@ -126,7 +126,7 @@ export class Gameboard {
                                     this.board[spot[0]][spot[1]].role = null;
                                     this.board[spot[0]][spot[1]].value = null;
                                 });
-                                return "Invalid postion";
+                                return "Invalid position";
                             }
                         }
                     }
@@ -145,10 +145,45 @@ export class Gameboard {
     }
 
     removeShip(ship) {
-        ship.coords.forEach(coord => {
-            this.board[coord[0]][coord[1]].hasShip = false;
-            this.board[coord[0]][coord[1]].role = null;
-            this.board[coord[0]][coord[1]].value = null;
+        if (ship.coords.length > 0) {
+            ship.coords.forEach(coord => {
+                this.board[coord[0]][coord[1]].hasShip = false;
+                this.board[coord[0]][coord[1]].role = null;
+                this.board[coord[0]][coord[1]].value = null;
+            });
+
+            ship.coords = [];
+        }
+        
+    }
+
+    randomPlacement(ship) {
+        const x = Math.floor(Math.random() * 10);
+        const y = Math.floor(Math.random() * 10);
+
+        const dirNum = Math.floor(Math.random() * 2);
+        let direction;
+        if (dirNum === 0) {
+            direction = "vertical";
+        }
+        else {
+            direction = "horizontal";
+        }
+
+        const validPlacement = this.placeShip(ship, x, y, direction);
+        if (validPlacement === "Invalid position") {
+            return this.randomPlacement(ship);
+        }
+        else {
+            return;
+        }
+    }
+
+    placeShipRandom() {
+
+        this.ships.forEach(ship => {
+            this.removeShip(ship);
+            this.randomPlacement(ship);
         })
     }
 
