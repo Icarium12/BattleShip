@@ -55,93 +55,130 @@ export class Gameboard {
 
     }
 
+    checkPlacement(ship, startX, startY, direction) {
+        const positions = [];
+        const length = ship.length;
+        
+        for (let i = 0; i < length; i++) {
+            const x = direction === "vertical" ? startX + i : startX;
+            const y = direction === "horizontal" ? startY + i : startY;
+
+            if (x < 0 || x >= 10 || y < 0 || y >= 10) {
+                return false;
+            }
+
+            positions.push([x, y]);
+        }
+
+        for (const [x, y] of positions) {
+            for (let neighborX = x - 1; neighborX <= x + 1; neighborX++) {
+                for (let neighborY = y - 1; neighborY <= y + 1; neighborY++) {
+                    if (
+                        neighborX >= 0 &&
+                        neighborX < 10 &&
+                        neighborY >= 0 &&
+                        neighborY < 10 &&
+                        this.board[neighborX][neighborY].hasShip
+                    ) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
     placeShip(ship, x, y, direction) {
-        if(this.board[x][y].hasShip === true) {
-            return "Invalid position";
+        if (this.checkPlacement(ship, x, y, direction)) {
+            if(this.board[x][y].hasShip === true) {
+                return "Invalid position";
+            }
+            else {
+                const lenght =  ship.length;
+                if (direction === 'vertical') {
+                    // check valid vertical placement
+                    if (x >= 0 && x + lenght <= 10 && y >= 0 && y < 10) {
+                        const changeSpots = [];
+
+                        for (let i = 0; i < lenght; i++) {
+                            if (i === 0) {
+                                this.board[x][y].role = "anchor";
+                                this.board[x][y].hasShip = true;
+                                this.board[x][y].value = ship;
+                                changeSpots.push([x, y]);
+                            }
+                            else {
+                                if(this.board[x + 1][y].hasShip === false) {
+                                    this.board[x + 1][y].role = "pointer";
+                                    this.board[x + 1][y].hasShip = true;
+                                    this.board[x + 1][y].value = ship;
+                                    changeSpots.push([x+1, y]);
+                                    x += 1;
+                                }
+                                else {
+                                    changeSpots.forEach(spot => {
+                                        this.board[spot[0]][spot[1]].hasShip = false;
+                                        this.board[spot[0]][spot[1]].role = null;
+                                        this.board[spot[0]][spot[1]].value = null;
+                                    });
+                                    return "Invalid position";
+                                }
+                            }
+                        }
+
+                        changeSpots.forEach(spot => {
+                            ship.coords.push(spot);
+                        })
+                    } 
+                    else {
+                        return "Invalid position";
+                    }
+                }
+                else if (direction === "horizontal") {
+                    // check horizontal postion
+                    if (y >= 0 && y + lenght <= 10 && x >= 0 && x < 10) {
+                        const changeSpots = [];
+
+                        for(let i = 0; i < lenght; i++) {
+                            if (i === 0) {
+                                this.board[x][y].role = "anchor";
+                                this.board[x][y].hasShip = true;
+                                this.board[x][y].value = ship;
+                                changeSpots.push([x, y]);
+                            }
+                            else {
+                                if (this.board[x][y+1].hasShip === false) {
+                                    this.board[x][y+1].role = "pointer";
+                                    this.board[x][y+1].hasShip = true;
+                                    this.board[x][y+1].value = ship;
+                                    changeSpots.push([x, y+1]);
+                                    y +=1;
+                                }
+                                else {
+                                    changeSpots.forEach(spot => {
+                                        this.board[spot[0]][spot[1]].hasShip = false;
+                                        this.board[spot[0]][spot[1]].role = null;
+                                        this.board[spot[0]][spot[1]].value = null;
+                                    });
+                                    return "Invalid position";
+                                }
+                            }
+                        }
+
+                        changeSpots.forEach(spot => {
+                            ship.coords.push(spot);
+                        })
+                    } 
+                    else {
+                        return "Invalid position";
+                    }
+                }
+            }
         }
         else {
-            const lenght =  ship.length;
-            if (direction === 'vertical') {
-                // check valid vertical placement
-                if (x >= 0 && x + lenght <= 10 && y >= 0 && y < 10) {
-                    const changeSpots = [];
-
-                    for (let i = 0; i < lenght; i++) {
-                        if (i === 0) {
-                            this.board[x][y].role = "anchor";
-                            this.board[x][y].hasShip = true;
-                            this.board[x][y].value = ship;
-                            changeSpots.push([x, y]);
-                        }
-                        else {
-                            if(this.board[x + 1][y].hasShip === false) {
-                                this.board[x + 1][y].role = "pointer";
-                                this.board[x + 1][y].hasShip = true;
-                                this.board[x + 1][y].value = ship;
-                                changeSpots.push([x+1, y]);
-                                x += 1;
-                            }
-                            else {
-                                changeSpots.forEach(spot => {
-                                    this.board[spot[0]][spot[1]].hasShip = false;
-                                    this.board[spot[0]][spot[1]].role = null;
-                                    this.board[spot[0]][spot[1]].value = null;
-                                });
-                                return "Invalid position";
-                            }
-                        }
-                    }
-
-                    changeSpots.forEach(spot => {
-                        ship.coords.push(spot);
-                    })
-                } 
-                else {
-                    return "Invalid position";
-                }
-            }
-            else if (direction === "horizontal") {
-                // check horizontal postion
-                if (y >= 0 && y + lenght <= 10 && x >= 0 && x < 10) {
-                    const changeSpots = [];
-
-                    for(let i = 0; i < lenght; i++) {
-                        if (i === 0) {
-                            this.board[x][y].role = "anchor";
-                            this.board[x][y].hasShip = true;
-                            this.board[x][y].value = ship;
-                            changeSpots.push([x, y]);
-                        }
-                        else {
-                            if (this.board[x][y+1].hasShip === false) {
-                                this.board[x][y+1].role = "pointer";
-                                this.board[x][y+1].hasShip = true;
-                                this.board[x][y+1].value = ship;
-                                changeSpots.push([x, y+1]);
-                                y +=1;
-                            }
-                            else {
-                                changeSpots.forEach(spot => {
-                                    this.board[spot[0]][spot[1]].hasShip = false;
-                                    this.board[spot[0]][spot[1]].role = null;
-                                    this.board[spot[0]][spot[1]].value = null;
-                                });
-                                return "Invalid position";
-                            }
-                        }
-                    }
-
-                    changeSpots.forEach(spot => {
-                        ship.coords.push(spot);
-                    })
-                } 
-                else {
-                    return "Invalid position";
-                }
-            }
+            return "Invalid position";
         }
-
-
     }
 
     removeShip(ship) {
@@ -180,9 +217,9 @@ export class Gameboard {
     }
 
     placeShipRandom() {
-
+        this.ships.forEach(ship => this.removeShip(ship));
+        
         this.ships.forEach(ship => {
-            this.removeShip(ship);
             this.randomPlacement(ship);
         })
     }
