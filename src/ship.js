@@ -5,6 +5,7 @@ export class Ship {
         this.hitNum = 0;
         this.sunk = false;
         this.coords = [];
+        this.boundary = [];
     }
 
     hit() {

@@ -12,6 +12,7 @@ class Node {
         this.allSpaces = [];
         this.anchorTo = null;
         this.hit = false;
+        // this.isBoundary = false;
         // this.neighbors = [];
         // this.up = null;
         // this.down = null;
@@ -82,11 +83,36 @@ export class Gameboard {
                     ) {
                         return false;
                     }
+                    else {
+                        
+                    }
                 }
             }
         }
 
         return true;
+    }
+
+    setShipBoundary(ship) {
+        ship.coords.forEach(([x, y]) => {
+            for (let boundaryX = x - 1; boundaryX <= x + 1; boundaryX++) {
+                for (let boundaryY = y - 1; boundaryY <= y + 1; boundaryY ++) {
+                    if (
+                        boundaryX >= 0 && boundaryX < 10 &&
+                        boundaryY >= 0 && boundaryY < 10
+                    ) {
+                        const isShipCell = ship.coords.some(
+                            ([shipX, shipY]) =>
+                                shipX === boundaryX && shipY === boundaryY
+                        );
+                        if (!isShipCell) {
+                            // this.board[boundaryX][boundaryY].isBoundary = true
+                            ship.boundary.push([boundaryX, boundaryY]);
+                        }
+                    }
+                }
+            }
+        })
     }
 
     placeShip(ship, x, y, direction) {
@@ -175,6 +201,7 @@ export class Gameboard {
                     }
                 }
             }
+            this.setShipBoundary(ship);
         }
         else {
             return "Invalid position";
@@ -190,6 +217,7 @@ export class Gameboard {
             });
 
             ship.coords = [];
+            ship.boundary = [];
         }
         
     }
