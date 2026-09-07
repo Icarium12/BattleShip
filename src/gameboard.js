@@ -253,205 +253,27 @@ export class Gameboard {
     }
 
     placeShipDefault() { 
-        const ship1Coords = [
-            {r: 0, c: 2},
-            {r: 0, c: 3},
-            {r: 0, c: 4}
-        ];
 
-        ship1Coords.forEach((coord, index) => {
-            if (index === 0) {
-                this.board[coord.r][coord.c].role = "anchor";
-                this.board[coord.r][coord.c].hasShip = true;
-                this.board[coord.r][coord.c].value = this.ship1;
-                this.board[coord.r][coord.c].allSpaces = ship1Coords;
-            }
-            else {
-                this.board[coord.r][coord.c].anchorTo = ship1Coords[0];
-                this.board[coord.r][coord.c].role = "pointer";
-                this.board[coord.r][coord.c].hasShip = true;
-                this.board[coord.r][coord.c].value = this.ship1;
-            }
-        });
+        this.placeShip(this.ship1, 0, 2, "horizontal");
+        
+        this.placeShip(this.ship2, 1, 7, "vertical");
 
-        const ship2Coords = [
-            {r: 1, c: 7},
-            {r: 2, c: 7}
-        ];
+        this.placeShip(this.ship3, 5, 7, "vertical");
 
-        ship2Coords.forEach((coord, index) => {
-            if (index === 0) {
-                this.board[coord.r][coord.c].role = "anchor";
-                this.board[coord.r][coord.c].hasShip = true;
-                this.board[coord.r][coord.c].value = this.ship2;
-                this.board[coord.r][coord.c].allSpaces = ship2Coords;
-            }
-            else {
-                this.board[coord.r][coord.c].anchorTo = ship2Coords[0];
-                this.board[coord.r][coord.c].role = "pointer";
-                this.board[coord.r][coord.c].hasShip = true;
-                this.board[coord.r][coord.c].value = this.ship2;
-            }
-        });
+        this.placeShip(this.ship4, 4, 9, "vertical");
 
-        const ship3Coords = [
-            {r: 5, c: 7}
-        ];
+        this.placeShip(this.ship5, 5, 0, "vertical");
 
-        ship3Coords.forEach((coord, index) => {
-            if (index === 0) {
-                this.board[coord.r][coord.c].role = "anchor";
-                this.board[coord.r][coord.c].hasShip = true;
-                this.board[coord.r][coord.c].value = this.ship3;
-                this.board[coord.r][coord.c].allSpaces = ship3Coords;
-            }
-            else {
-                this.board[coord.r][coord.c].anchorTo = ship3Coords[0];
-                this.board[coord.r][coord.c].role = "pointer";
-                this.board[coord.r][coord.c].hasShip = true;
-                this.board[coord.r][coord.c].value = this.ship3;
-            }
-        })
+        this.placeShip(this.ship6, 9, 5, "horizontal");
 
-        const ship4Coords = [
-            {r: 4, c: 9}
-        ];
+        this.placeShip(this.ship7, 7, 3, "horizontal");
 
-        ship4Coords.forEach((coord, index) => {
-            if (index === 0) {
-                this.board[coord.r][coord.c].role = "anchor";
-                this.board[coord.r][coord.c].hasShip = true;
-                this.board[coord.r][coord.c].value = this.ship4;
-                this.board[coord.r][coord.c].allSpaces = ship4Coords;
-            }
-            else {
-                this.board[coord.r][coord.c].anchorTo = ship4Coords[0];
-                this.board[coord.r][coord.c].role = "pointer";
-                this.board[coord.r][coord.c].hasShip = true;
-                this.board[coord.r][coord.c].value = this.ship4;
-            }
-        });
+        this.placeShip(this.ship8, 2, 3, "vertical");
 
-        const ship5Coords = [
-            {r: 5, c:1},
-            {r: 6, c:1},
-        ];
+        this.placeShip(this.ship9, 8, 9, "vertical");
 
-        ship5Coords.forEach((coord, index) => {
-            if (index === 0) {
-                this.board[coord.r][coord.c].role = "anchor";
-                this.board[coord.r][coord.c].hasShip = true;
-                this.board[coord.r][coord.c].value = this.ship5;
-                this.board[coord.r][coord.c].allSpaces = ship5Coords;
-            }
-            else {
-                this.board[coord.r][coord.c].anchorTo = ship5Coords[0];
-                this.board[coord.r][coord.c].role = "pointer";
-                this.board[coord.r][coord.c].hasShip = true;
-                this.board[coord.r][coord.c].value = this.ship5;
-            }
-        });
+        this.placeShip(this.ship10, 2, 5, "vertical");
 
-        const ship6Coords = [
-            {r: 9, c: 5},
-            {r: 9, c: 6},
-            {r: 9, c: 7}
-        ];
-
-        ship6Coords.forEach((coord, index) => {
-            if (index === 0) {
-                this.board[coord.r][coord.c].role = "anchor";
-                this.board[coord.r][coord.c].hasShip = true;
-                this.board[coord.r][coord.c].value = this.ship6;
-                this.board[coord.r][coord.c].allSpaces = ship6Coords;
-            }
-            else {
-                this.board[coord.r][coord.c].anchorTo = ship6Coords[0];
-                this.board[coord.r][coord.c].role = "pointer";
-                this.board[coord.r][coord.c].hasShip = true;
-                this.board[coord.r][coord.c].value = this.ship6;
-            }
-        });
-
-        const ship7Coords = [
-            {r: 7, c: 3},
-            {r: 7, c: 4},
-            {r: 7, c: 5},
-            {r: 7, c: 6},
-        ];
-
-        ship7Coords.forEach((coord, index) => {
-            if (index === 0) {
-                this.board[coord.r][coord.c].role = "anchor";
-                this.board[coord.r][coord.c].hasShip = true;
-                this.board[coord.r][coord.c].value = this.ship7;
-                this.board[coord.r][coord.c].allSpaces = ship7Coords;
-            }
-            else {
-                this.board[coord.r][coord.c].anchorTo = ship7Coords[0];
-                this.board[coord.r][coord.c].role = "pointer";
-                this.board[coord.r][coord.c].hasShip = true;
-                this.board[coord.r][coord.c].value = this.ship7;
-            }
-        });
-
-        const ship8Coords = [
-            {r: 2, c: 3},
-            {r: 3, c: 3}
-        ];
-
-        ship8Coords.forEach((coord, index) => {
-            if (index === 0) {
-                this.board[coord.r][coord.c].role = "anchor";
-                this.board[coord.r][coord.c].hasShip = true;
-                this.board[coord.r][coord.c].value = this.ship8;
-                this.board[coord.r][coord.c].allSpaces = ship8Coords;
-            }
-            else {
-                this.board[coord.r][coord.c].anchorTo = ship8Coords[0];
-                this.board[coord.r][coord.c].role = "pointer";
-                this.board[coord.r][coord.c].hasShip = true;
-                this.board[coord.r][coord.c].value = this.ship8;
-            }
-        });
-
-        const ship9Coords = [
-            {r: 8, c: 9}
-        ]
-
-        ship9Coords.forEach((coord, index) => {
-            if (index === 0) {
-                this.board[coord.r][coord.c].role = "anchor";
-                this.board[coord.r][coord.c].hasShip = true;
-                this.board[coord.r][coord.c].value = this.ship9;
-                this.board[coord.r][coord.c].allSpaces = ship9Coords;
-            }
-            else {
-                this.board[coord.r][coord.c].anchorTo = ship9Coords[0];
-                this.board[coord.r][coord.c].role = "pointer";
-                this.board[coord.r][coord.c].hasShip = true;
-                this.board[coord.r][coord.c].value = this.ship9;
-            }
-        });
-
-        const ship10Coords = [
-            {r: 2, c: 5}
-        ];
-
-        ship10Coords.forEach((coord, index) => {
-            if (index === 0) {
-                this.board[coord.r][coord.c].role = "anchor";
-                this.board[coord.r][coord.c].hasShip = true;
-                this.board[coord.r][coord.c].value = this.ship10;
-                this.board[coord.r][coord.c].allSpaces = ship10Coords;
-            }
-            else {
-                this.board[coord.r][coord.c].anchorTo = ship10Coords[0];
-                this.board[coord.r][coord.c].role = "pointer";
-                this.board[coord.r][coord.c].hasShip = true;
-                this.board[coord.r][coord.c].value = this.ship10;
-            }
-        });
     }
 
     receiveAttack(x, y) {

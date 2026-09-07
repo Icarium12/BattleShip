@@ -236,6 +236,20 @@ function computerMove (gameboard, boardCont, oppBoardCont, gameState) {
                 else if (boardArray[x][y].hasShip === true && boardArray[x][y].hit === false) { 
                     hit(x, y, gameboard);
                     square.textContent = "X";
+                    const ship = boardArray[x][y].value;
+                    if (ship.sunk === true) {
+                        ship.boundary.forEach(([x, y]) => {
+                            boardArray[x][y].hit = true;
+                            const boundarySquare = [...oppBoardCont.children].find(square => {
+                                const [squareX, squareY] = JSON.parse(square.dataset.myArray);
+                                return squareX === x && squareY === y;
+                            })
+
+                            if (boundarySquare) {
+                                boundarySquare.textContent = ".";
+                            }
+                        })
+                    }
                     setTimeout(() => {
                         computerMove(gameboard, boardCont, oppBoardCont, gameState);
                     }, 1000);
@@ -325,7 +339,7 @@ export function createPlayer(container) {
 
             const computer = new Player('computer', 'computer');
             computer.playerBoard.createBoard();
-            computer.playerBoard.placeShipRandom();
+            computer.playerBoard.placeShipDefault();
             renderOppBoard(computer.playerBoard, playerCont, oppBoardCont);
 
             const squareHandlers = new Map();
@@ -347,6 +361,7 @@ export function createPlayer(container) {
                             square.style.border = "2px solid red";
                             const ship  = computer.playerBoard.board[coord[0]][coord[1]].value;
                             const gameboard = computer.playerBoard.board;
+
                             if (ship.sunk === true) {
                                 console.log("ran");
                                 ship.boundary.forEach(([x ,y]) => {
@@ -387,53 +402,7 @@ export function createPlayer(container) {
 
                 squareHandlers.set(square, handler);
                 square.addEventListener('click', handler, {once: true});
-                // square.addEventListener('click', () => {
-                //     if (gameState.activePlayer === 1 && gameState.boardOwner === 2) {
-                //         gameState.activePlayer = 2;
-                //         gameState.boardOwner = 1;
-                //         const coordString = square.dataset.myArray;
-                //         const coord = JSON.parse(coordString);
-                //         hit(coord[0], coord[1], computer.playerBoard);
-                //         if(computer.playerBoard.board[coord[0]][coord[1]].hit === true && computer.playerBoard.board[coord[0]][coord[1]].hasShip === true) {
-                //             console.log(computer.playerBoard.board[coord[0]][coord[1]].value);
-                //             gameState.activePlayer = 1;
-                //             gameState.boardOwner = 2;
-                //             square.textContent = "X";
-                //             square.style.border = "2px solid red";
-                //             const ship  = computer.playerBoard.board[coord[0]][coord[1]].value;
-                //             const gameboard = computer.playerBoard.board;
-                //             if (ship.sunk === true) {
-                //                 console.log("ran");
-                //                 ship.boundary.forEach(([x ,y]) => {
-                //                     gameboard[x][y].hit = true;
-                //                     const boundarySquare = [...oppBoardCont.children].find(square => {
-                //                         const [squareX, squareY] = JSON.parse(square.dataset.myArray);
-                //                         return squareX === x && squareY === y;
-                //                     })
-
-                //                     if (boundarySquare) {
-                //                         boundarySquare.textContent = ".";
-                //                         // boundarySquare.removeEventListener('click', ());
-                //                     }
-                //                 })
-                //             }
-                //             return;
-                //         }
-        
-                //         else if(computer.playerBoard.board[coord[0]][coord[1]].hit === true && computer.playerBoard.board[coord[0]][coord[1]].hasShip === false) {
-                //             // activePlayer = 2;
-                //             // boardOwner = 1;
-                //             square.textContent = ".";
-                //             oppBoardCont.style.backgroundColor = "#f5f5f5";
-                //             playerBoardCont.style.backgroundColor = "#ffffff";
-                //         }  
-                //     }
-                //     setTimeout(() => {
-                //         computerMove(player.playerBoard, oppBoardCont, playerBoardCont, gameState);
-                //     }, 1000);
-                    
-                //     // computerMove(player.playerBoard, square, playerBoardCont);
-                // }, { once: true});
+                
             });
 
             oppBoardCont.addEventListener('click', () => {
