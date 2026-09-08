@@ -197,6 +197,46 @@ function squareClicks(boardCont, gameboard, ship, shipDirection, cont) {
     })
 }
 
+function dragAndDrop(gameboard, boardCont) {
+
+     const shipSquares = [];
+
+    boardCont.addEventListener('pointerdown', (e) => {
+        
+        const item = e.target;
+
+        const coordString = item.dataset.myArray
+        const coords = JSON.parse(coordString);
+
+        if (gameboard.board[coords[0]][coords[1]].hasShip === true) {
+            console.log(gameboard.board[coords[0]][coords[1]].value);
+
+            const ship = gameboard.board[coords[0]][coords[1]].value
+
+            boardCont.childNodes.forEach(node => {
+                const coordString = node.dataset.myArray
+                const coords = JSON.parse(coordString);
+
+                const cell = gameboard.board[coords[0]][coords[1]];
+                // console.log(cell);
+
+                if (cell.value === ship) {
+                    console.log(cell)
+                    shipSquares.push(node);
+                }
+            })
+
+            console.log(shipSquares);
+        }
+
+    })
+  
+    const squares = boardCont.childNodes;
+    squares.forEach(square => {
+
+    })
+}
+
 function waitForClick(element) {
     return new Promise(resolve => {
         element.addEventListener('click', function handler() {
@@ -322,6 +362,8 @@ export function createPlayer(container) {
         // player.playerBoard.placeShipDefault();
         renderShips(player.playerBoard, shipCont);
         renderBoard(player.playerBoard, playerCont, playerBoardCont);
+
+        dragAndDrop(player.playerBoard, playerBoardCont);
 
         const start = document.createElement('button');
         start.textContent = "Start Game";
