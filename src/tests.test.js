@@ -2,13 +2,13 @@ import { Ship } from "./ship";
 import  { Gameboard } from "./gameboard";
 
 test('test for hit method', () => {
-    const instance = new Ship(3);
+    const instance = new Ship(3, 1);
     instance.hit();
     expect(instance.hitNum).toBe(1);
 })
 
 test('test for isSunk method', () => {
-    const instance = new Ship(0);
+    const instance = new Ship(0, 1);
     instance.isSunk();
     expect(instance.sunk).toBe(true);
 })

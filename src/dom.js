@@ -18,7 +18,9 @@ export function renderBoard(gameboard, container, boardCont) {
             square.dataset.myArray = JSON.stringify(coordinates);
             square.className = 'square';
             if (boardArray[i][j].hasShip === true) {
+                square.dataset.shipId = boardArray[i][j].value.id
                 square.style.border = "2px solid blue";
+                square.classList.add('ship');
             }
             else {
                 square.style.border = "1px solid black";
@@ -199,41 +201,43 @@ function squareClicks(boardCont, gameboard, ship, shipDirection, cont) {
 
 function dragAndDrop(gameboard, boardCont) {
 
-     const shipSquares = [];
-
+    let activePiece = null;
+    let lastMouseX = 0;
+    let lastMouseY = 0;
+    
     boardCont.addEventListener('pointerdown', (e) => {
-        
-        const item = e.target;
+        if (!e.target.classList.contains('ship')) return;
 
-        const coordString = item.dataset.myArray
-        const coords = JSON.parse(coordString);
+        activePiece = e.target;
+        activePiece.setPointerCapture(e.pointerId);
 
-        if (gameboard.board[coords[0]][coords[1]].hasShip === true) {
-            console.log(gameboard.board[coords[0]][coords[1]].value);
-
-            const ship = gameboard.board[coords[0]][coords[1]].value
-
-            boardCont.childNodes.forEach(node => {
-                const coordString = node.dataset.myArray
-                const coords = JSON.parse(coordString);
-
-                const cell = gameboard.board[coords[0]][coords[1]];
-                // console.log(cell);
-
-                if (cell.value === ship) {
-                    console.log(cell)
-                    shipSquares.push(node);
-                }
-            })
-
-            console.log(shipSquares);
-        }
-
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
     })
-  
-    const squares = boardCont.childNodes;
-    squares.forEach(square => {
 
+    boardCont.addEventListener('pointermove', (e) => {
+        if (!activePiece) return;
+
+        const deltaX = e.clientX - lastMouseX;
+        const deltaY = e.clientY - lastMouseY;
+
+        const shipId = activePiece.dataset.shipId;
+        const relatedPieces = boardCont.querySelectorAll(`[data-ship-id="${shipId}"]`);
+
+        relatedPieces.forEach(piece => {
+            const currentLeft = parseFloat(piece.style.left) || 0;
+            const currentTop = parseFloat(piece.style.top) || 0;
+
+            piece.style.left = `${currentLeft + deltaX}px`;
+            piece.style.top = `${currentTop + deltaY}px`;
+        });
+
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+    });
+
+    boardCont.addEventListener('pointerup', (e) => {
+        if (!activePiece) return;
     })
 }
 

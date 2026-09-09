@@ -1,11 +1,12 @@
 export class Ship {
 
-    constructor(length) {
+    constructor(length, id) {
         this.length = length;
         this.hitNum = 0;
         this.sunk = false;
         this.coords = [];
         this.boundary = [];
+        this.id = id;
     }
 
     hit() {

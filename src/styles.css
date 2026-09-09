@@ -10,10 +10,12 @@
 }
 
 .square {
+    position: relative;
     box-sizing: border-box;
     display: flex;
     justify-content: center;
     align-items: center;
+    /* cursor: grab; */
 }
 
 .player-cont {

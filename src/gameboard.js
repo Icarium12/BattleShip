@@ -27,16 +27,16 @@ export class Gameboard {
 
     constructor() {
         this.board = [];
-        this.ship1 = new Ship(3);
-        this.ship2 = new Ship(2);
-        this.ship3 = new Ship(1);
-        this.ship4 = new Ship(1);
-        this.ship5 = new Ship(2);
-        this.ship6 = new Ship(3);
-        this.ship7 = new Ship(4);
-        this.ship8 = new Ship(2);
-        this.ship9 = new Ship(1);
-        this.ship10 = new Ship(1);
+        this.ship1 = new Ship(3, 1);
+        this.ship2 = new Ship(2, 2);
+        this.ship3 = new Ship(1, 3);
+        this.ship4 = new Ship(1, 4);
+        this.ship5 = new Ship(2, 5);
+        this.ship6 = new Ship(3, 6);
+        this.ship7 = new Ship(4, 7);
+        this.ship8 = new Ship(2, 8);
+        this.ship9 = new Ship(1, 9);
+        this.ship10 = new Ship(1, 10);
         this.ships = [this.ship1, this.ship2, this.ship3, this.ship4, this.ship5,
                     this.ship6, this.ship7, this.ship8, this.ship9, this.ship10
         ]
