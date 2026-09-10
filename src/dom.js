@@ -26,16 +26,6 @@ export function renderBoard(gameboard, container, boardCont) {
                 square.style.border = "1px solid black";
             }
 
-            // if (boardArray[i][j].hit === true && boardArray[i][j].hasShip === true) {
-            //     square.textContent = "X";
-            // }
-
-            // else if (boardArray[i][j].hit === true && boardArray[i][j].hasShip === true) {
-            //     square.textContent = ".";
-            // }
-            // square.addEventListener('click', () => {
-            //     gameboard.receiveAttack(i, j);
-            // });
             boardCont.append(square);
         }
     }
@@ -204,12 +194,43 @@ function dragAndDrop(gameboard, boardCont) {
     let activePiece = null;
     let lastMouseX = 0;
     let lastMouseY = 0;
+    let anchorOffsetX = 0;
+    let anchorOffsetY = 0;
+    let validPlacement;
     
     boardCont.addEventListener('pointerdown', (e) => {
         if (!e.target.classList.contains('ship')) return;
 
         activePiece = e.target;
         activePiece.setPointerCapture(e.pointerId);
+
+        const shipId = activePiece.dataset.shipId;
+        const relatedPieces = [
+            ...boardCont.querySelectorAll(`[data-ship-id="${shipId}"]`)
+        ];
+
+        relatedPieces.forEach((piece) => {
+            piece.style.pointerEvents = "none";
+        })
+
+        const ship = gameboard.board[
+            JSON.parse(activePiece.dataset.myArray)[0]
+        ][
+            JSON.parse(activePiece.dataset.myArray)[1]
+        ].value;
+
+        const anchorCoords = ship.coords[0];
+
+        const anchorPiece = relatedPieces.find((piece) => {
+            const coords = JSON.parse(piece.dataset.myArray);
+            return coords[0] === anchorCoords[0] &&
+                   coords[1] === anchorCoords[1];
+        });
+
+        const anchorRect = anchorPiece.getBoundingClientRect();
+
+        anchorOffsetX = anchorRect.left + anchorRect.width / 2 - e.clientX;
+        anchorOffsetY = anchorRect.top + anchorRect.height / 2 - e.clientY
 
         lastMouseX = e.clientX;
         lastMouseY = e.clientY;
@@ -220,6 +241,9 @@ function dragAndDrop(gameboard, boardCont) {
 
         const deltaX = e.clientX - lastMouseX;
         const deltaY = e.clientY - lastMouseY;
+
+        const anchorX = e.clientX + anchorOffsetX;
+        const anchorY = e.clientY + anchorOffsetY;
 
         const shipId = activePiece.dataset.shipId;
         const relatedPieces = boardCont.querySelectorAll(`[data-ship-id="${shipId}"]`);
@@ -234,10 +258,142 @@ function dragAndDrop(gameboard, boardCont) {
 
         lastMouseX = e.clientX;
         lastMouseY = e.clientY;
+
+        let coords = JSON.parse(activePiece.dataset.myArray);
+        let x = coords[0];
+        let y = coords[1];
+
+        if (gameboard.board[x][y].role === 'anchor') {
+            const target = document.elementFromPoint(anchorX, anchorY);
+            const square = target?.closest(".square");
+
+            if (!square?.dataset.myArray) return;
+            const newCoords = JSON.parse(square.dataset.myArray);
+            let newX = newCoords[0];
+            let newY = newCoords[1];
+            let ship = gameboard.board[x][y].value;
+
+            const oldCoords = ship.coords.map(coord => [...coord]);
+            const oldDirection = ship.coords.length > 1 &&
+                ship.coords[0][0] !== ship.coords[1][0]
+                ? "vertical"
+                : "horizontal";
+            
+            gameboard.removeShip(ship);
+            validPlacement = gameboard.checkPlacement(ship, newX, newY, oldDirection);
+
+            gameboard.placeShip(
+                    ship,
+                    oldCoords[0][0],
+                    oldCoords[0][1],
+                    oldDirection
+                )
+
+            if (!validPlacement) {
+                activePiece.style.border = "2px solid red";
+                relatedPieces.forEach(piece => {
+                    piece.style.border = "2px solid red";
+                })
+            }
+            else {
+                activePiece.style.border = "2px solid blue";
+                relatedPieces.forEach(piece => {
+                    piece.style.border = "2px solid blue";
+                })
+            }
+        }
+        else {
+            for (const piece of relatedPieces) {
+                let coords = JSON.parse(piece.dataset.myArray);
+                let x = coords[0];
+                let y = coords[1];
+
+                if (gameboard.board[x][y].role === 'anchor') {
+                    const target = document.elementFromPoint(anchorX, anchorY);
+                    const square = target?.closest(".square");
+
+                    if (!square?.dataset.myArray) return;
+                    const newCoords = JSON.parse(square.dataset.myArray);
+                    let newX = newCoords[0];
+                    let newY = newCoords[1];
+                    let ship = gameboard.board[x][y].value;
+
+                    const oldCoords = ship.coords.map(coord => [...coord]);
+                    const oldDirection = ship.coords.length > 1 &&
+                        ship.coords[0][0] !== ship.coords[1][0]
+                        ? "vertical"
+                        : "horizontal";
+                    
+                    gameboard.removeShip(ship);
+                    validPlacement = gameboard.checkPlacement(ship, newX, newY, oldDirection);
+
+                    
+                   gameboard.placeShip(
+                        ship,
+                        oldCoords[0][0],
+                        oldCoords[0][1],
+                        oldDirection
+                    )
+                    if (!validPlacement) {
+                        activePiece.style.border = "2px solid red";
+                        relatedPieces.forEach(p => {
+                            p.style.border = "2px solid red";
+                        });
+                    }
+                    else {
+                        activePiece.style.border = "2px solid blue";
+                        relatedPieces.forEach(p => {
+                            p.style.border = "2px solid blue";
+                        });
+                    }
+
+                    break;
+
+                }
+            }
+        }
     });
 
     boardCont.addEventListener('pointerup', (e) => {
         if (!activePiece) return;
+
+        const anchorX = e.clientX + anchorOffsetX;
+        const anchorY = e.clientY + anchorOffsetY;
+        
+        if (validPlacement) {
+            const origin = JSON.parse(activePiece.dataset.myArray);
+            const ship = gameboard.board[origin[0]][origin[1]].value
+
+            const target = document.elementFromPoint(anchorX, anchorY);
+            const square = target?.closest(".square");
+
+            if (!square?.dataset.myArray) return;
+            const newCoords = JSON.parse(square.dataset.myArray);
+            let newX = newCoords[0];
+            let newY = newCoords[1];
+
+            const oldDirection = ship.coords.length > 1 &&
+                        ship.coords[0][0] !== ship.coords[1][0]
+                        ? "vertical"
+                        : "horizontal";
+            
+            gameboard.removeShip(ship);
+
+            gameboard.placeShip(
+                ship,
+                newX,
+                newY,
+                oldDirection
+            )
+
+            renderBoard(gameboard, null, boardCont);
+            activePiece = null;
+            
+        }
+        else {
+            renderBoard(gameboard, null, boardCont);
+            activePiece = null;
+        }
     })
 }
 
