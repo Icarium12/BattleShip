@@ -1,5 +1,4 @@
 import path from "node:path";
-import test from "node:test";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 
 export default {
@@ -25,7 +24,14 @@ export default {
              test: /\.css$/i,
             use: ["style-loader", "css-loader"],   
             },
-            
+            {
+                test: /\.html$/i,
+                use: ["html-loader"],
+            },
+            {
+                test: /\.(png|svg|jpg|jpeg|gif)$/i,
+                type: "asset/resource",
+            }
         ],
     },
 };

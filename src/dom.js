@@ -1,5 +1,6 @@
 import { Player } from "./player";
 import { playerCont, playerBoardCont, oppBoardCont, winPopup, shipCont } from ".";
+import targetImg from "./target.jpg";
 
 export function renderBoard(gameboard, container, boardCont) {
     boardCont.replaceChildren();
@@ -16,11 +17,11 @@ export function renderBoard(gameboard, container, boardCont) {
             const square = document.createElement('div');
             const coordinates = [i, j];
             square.dataset.myArray = JSON.stringify(coordinates);
-            square.className = 'square';
+            square.classList.add("square")
             if (boardArray[i][j].hasShip === true) {
                 square.dataset.shipId = boardArray[i][j].value.id
                 square.style.border = "2px solid blue";
-                square.classList.add('ship');
+                square.classList.add("square",'ship');
             }
             else {
                 square.style.border = "1px solid black";
@@ -50,13 +51,7 @@ export function renderOppBoard(gameboard, container, boardCont) {
             square.dataset.myArray = JSON.stringify(coordinates);
             square.className = 'square';
             square.style.border = "1px solid black";
-            // if (boardArray[i][j].hit === true && boardArray[i][j].hasShip === true) {
-            //     square.textContent = "X";
-            // }
-
-            // else if (boardArray[i][j].hit === true && boardArray[i][j].hasShip === true) {
-            //     square.textContent = ".";
-            // }
+            
             boardCont.append(square);
         }
         
@@ -81,7 +76,7 @@ function renderShips(gameboard, cont) {
         shipCont.className = "ship-holder";
         for (let i = 0; i < length; i++) {
             const shipSq = document.createElement('div');
-            shipSq.className = "ship";
+            shipSq.className = "ship-pl";
             shipSq.dataset.value = ship;
             shipCont.appendChild(shipSq);
 
@@ -290,13 +285,11 @@ function dragAndDrop(gameboard, boardCont) {
                 )
 
             if (!validPlacement) {
-                activePiece.style.border = "2px solid red";
                 relatedPieces.forEach(piece => {
                     piece.style.border = "2px solid red";
                 })
             }
             else {
-                activePiece.style.border = "2px solid blue";
                 relatedPieces.forEach(piece => {
                     piece.style.border = "2px solid blue";
                 })
@@ -335,13 +328,11 @@ function dragAndDrop(gameboard, boardCont) {
                         oldDirection
                     )
                     if (!validPlacement) {
-                        activePiece.style.border = "2px solid red";
                         relatedPieces.forEach(p => {
                             p.style.border = "2px solid red";
                         });
                     }
                     else {
-                        activePiece.style.border = "2px solid blue";
                         relatedPieces.forEach(p => {
                             p.style.border = "2px solid blue";
                         });
@@ -532,7 +523,9 @@ export function createPlayer(container) {
 
             buttons.forEach(button => {
                 button.remove();
-            })
+            });
+
+            playerBoardCont.style.pointerEvents = 'none';
 
             const gameState = {
                 activePlayer: 1,
@@ -544,66 +537,79 @@ export function createPlayer(container) {
             computer.playerBoard.placeShipDefault();
             renderOppBoard(computer.playerBoard, playerCont, oppBoardCont);
 
-            const squareHandlers = new Map();
+            const image = document.createElement("img");
+            image.src = targetImg;
 
-            const oppSquares = oppBoardCont.childNodes;
-            oppSquares.forEach(square => {
-                const handler = () => {
-                     if (gameState.activePlayer === 1 && gameState.boardOwner === 2) {
-                        gameState.activePlayer = 2;
-                        gameState.boardOwner = 1;
-                        const coordString = square.dataset.myArray;
-                        const coord = JSON.parse(coordString);
-                        hit(coord[0], coord[1], computer.playerBoard);
-                        if(computer.playerBoard.board[coord[0]][coord[1]].hit === true && computer.playerBoard.board[coord[0]][coord[1]].hasShip === true) {
-                            console.log(computer.playerBoard.board[coord[0]][coord[1]].value);
-                            gameState.activePlayer = 1;
-                            gameState.boardOwner = 2;
-                            square.textContent = "X";
-                            square.style.border = "2px solid red";
-                            const ship  = computer.playerBoard.board[coord[0]][coord[1]].value;
-                            const gameboard = computer.playerBoard.board;
+            const fireBtn = document.createElement('button');
+            fireBtn.textContent = "fire";
+            fireBtn.disabled = true;
 
-                            if (ship.sunk === true) {
-                                console.log("ran");
-                                ship.boundary.forEach(([x ,y]) => {
-                                    gameboard[x][y].hit = true;
-                                    const boundarySquare = [...oppBoardCont.children].find(square => {
-                                        const [squareX, squareY] = JSON.parse(square.dataset.myArray);
-                                        return squareX === x && squareY === y;
-                                    })
+            let selectedSquare = null;
 
-                                    if (boundarySquare) {
-                                        boundarySquare.textContent = ".";
+            fireBtn.addEventListener("click", () => {
+                if (!selectedSquare) return;
+                if (gameState.activePlayer !== 1 || gameState.boardOwner !== 2) return;
 
-                                        const handler = squareHandlers.get(boundarySquare);
+                const coord = JSON.parse(selectedSquare.dataset.myArray);
+                const cell = computer.playerBoard.board[coord[0]][coord[1]];
+                
 
-                                        if (handler) {
-                                            boundarySquare.removeEventListener('click', handler);
-                                            squareHandlers.delete(boundarySquare);
-                                        }
-                                        // boundarySquare.removeEventListener('click', ());
-                                    }
-                                })
+                if (cell.hit) return;
+
+                gameState.activePlayer = 2;
+                gameState.boardOwner = 1;
+
+                hit(coord[0], coord[1], computer.playerBoard);
+
+                if (cell.hasShip) {
+                    const ship = cell.value;
+                    selectedSquare.textContent = "X";
+                    selectedSquare.style.border = "2px solid red";
+
+                    gameState.activePlayer = 1;
+                    gameState.boardOwner = 2;
+
+                    if (ship.sunk) {
+                        ship.boundary.forEach(([x ,y]) => {
+                            computer.playerBoard.board[x][y].hit = true;
+                            const boundarySquare = [...oppBoardCont.children].find(square => {
+                                const [squareX, squareY] = JSON.parse(square.dataset.myArray);
+                                return squareX === x && squareY === y;
+                            })
+
+                            if (boundarySquare) {
+                                boundarySquare.textContent = ".";
                             }
-                            return;
-                        }
-        
-                        else if(computer.playerBoard.board[coord[0]][coord[1]].hit === true && computer.playerBoard.board[coord[0]][coord[1]].hasShip === false) {
-                            // activePlayer = 2;
-                            // boardOwner = 1;
-                            square.textContent = ".";
-                            oppBoardCont.style.backgroundColor = "#f5f5f5";
-                            playerBoardCont.style.backgroundColor = "#ffffff";
-                        }  
+                        })
                     }
+                }
+                else {
+                    selectedSquare.textContent = ".";
+                    oppBoardCont.style.backgroundColor = "#f5f5f5";
+                    playerBoardCont.style.backgroundColor = "#ffffff";
+
                     setTimeout(() => {
                         computerMove(player.playerBoard, oppBoardCont, playerBoardCont, gameState);
                     }, 1000);
                 }
+            });
 
-                squareHandlers.set(square, handler);
-                square.addEventListener('click', handler, {once: true});
+            oppBoardCont.appendChild(fireBtn);
+
+            const oppSquares = oppBoardCont.querySelectorAll(".square");
+            oppSquares.forEach(square => {
+                square.addEventListener("click", () => {
+                    const coord = JSON.parse(square.dataset.myArray);
+                    const cell = computer.playerBoard.board[coord[0]][coord[1]];
+
+                    if (cell.hit) return;
+                    selectedSquare = square;
+                    image.remove();
+                    square.appendChild(image);
+                    fireBtn.disabled = false;
+                })
+
+                
                 
             });
 
