@@ -60,6 +60,7 @@ export function renderOppBoard(gameboard, container, boardCont) {
 }
 
 function renderShips(gameboard, cont) {
+    let shipAdd = 0;
     
     const random = document.createElement('button');
     random.textContent = "Randomize Placement";
@@ -70,98 +71,102 @@ function renderShips(gameboard, cont) {
         cont.remove();
     })
     cont.appendChild(random);
-    gameboard.ships.forEach(ship => {
-        const length = ship.length;
-        const shipCont = document.createElement('div');
-        shipCont.className = "ship-holder";
-        for (let i = 0; i < length; i++) {
-            const shipSq = document.createElement('div');
-            shipSq.className = "ship-pl";
-            shipSq.dataset.value = ship;
-            shipCont.appendChild(shipSq);
+    // gameboard.ships.forEach(ship => {
+    //     const length = ship.length;
+    //     const shipCont = document.createElement('div');
+    //     shipCont.className = "ship-holder";
+    //     for (let i = 0; i < length; i++) {
+    //         const shipSq = document.createElement('div');
+    //         shipSq.className = "ship-pl";
+    //         shipSq.dataset.value = ship;
+    //         shipCont.appendChild(shipSq);
 
-            cont.appendChild(shipCont);
-        }
+    //         cont.appendChild(shipCont);
+    //     }
 
         
 
-        const dialog =  document.createElement('dialog');
+    //     const dialog =  document.createElement('dialog');
 
-        const shipCont2 = shipCont.cloneNode(true);
+    //     const shipCont2 = shipCont.cloneNode(true);
 
-        dialog.appendChild(shipCont2);
+    //     dialog.appendChild(shipCont2);
 
-        const label = document.createElement('label');
-        label.textContent = "Change ship orientation: ";
-        dialog.appendChild(label);
+    //     const label = document.createElement('label');
+    //     label.textContent = "Change ship orientation: ";
+    //     dialog.appendChild(label);
 
-        const shipDirection = document.createElement('select');
-        shipDirection.name = "set-ship-direction";
+    //     const shipDirection = document.createElement('select');
+    //     shipDirection.name = "set-ship-direction";
 
-        const option1 = document.createElement('option');
-        option1.value = "horizontal";
-        option1.textContent = "horizontal";
-        shipDirection.appendChild(option1);
+    //     const option1 = document.createElement('option');
+    //     option1.value = "horizontal";
+    //     option1.textContent = "horizontal";
+    //     shipDirection.appendChild(option1);
 
-        const option2 = document.createElement('option');
-        option2.value = "vertical";
-        option2.textContent = "vertical";
-        shipDirection.appendChild(option2);
+    //     const option2 = document.createElement('option');
+    //     option2.value = "vertical";
+    //     option2.textContent = "vertical";
+    //     shipDirection.appendChild(option2);
 
-        shipDirection.addEventListener('change', () => {
-            if (shipDirection.value === "vertical") {
-                shipCont2.style.flexDirection = "column";
-            }
-            else if (shipDirection.value === "horizontal") {
-                shipCont2.style.flexDirection = "row";
-            }
-        })
-        dialog.appendChild(shipDirection);
+    //     shipDirection.addEventListener('change', () => {
+    //         if (shipDirection.value === "vertical") {
+    //             shipCont2.style.flexDirection = "column";
+    //         }
+    //         else if (shipDirection.value === "horizontal") {
+    //             shipCont2.style.flexDirection = "row";
+    //         }
+    //     })
+    //     dialog.appendChild(shipDirection);
 
-        const boardCont = document.createElement('div');
-        boardCont.className = "place-ship-board";
-        renderBoard(gameboard, cont, boardCont);
-        dialog.appendChild(boardCont);
+    //     const boardCont = document.createElement('div');
+    //     boardCont.className = "place-ship-board";
+    //     renderBoard(gameboard, cont, boardCont);
+    //     dialog.appendChild(boardCont);
 
-        const setShip = document.createElement('button');
-        setShip.type = "button";
-        setShip.textContent = "Confirm Placement";
-        setShip.addEventListener('click', () => {
-            dialog.close();
-            shipCont.remove();
-            renderBoard(gameboard, cont, playerBoardCont);
-        })
-        dialog.appendChild(setShip);
+    //     const setShip = document.createElement('button');
+    //     setShip.type = "button";
+    //     setShip.textContent = "Confirm Placement";
+    //     setShip.addEventListener('click', () => {
+    //         dialog.close();
+    //         shipCont.remove();
+    //         renderBoard(gameboard, cont, playerBoardCont);
+    //         shipAdd++
 
-        const removeShip = document.createElement('button');
-        removeShip.type = "button";
-        removeShip.textContent = "Remove ship";
-        removeShip.addEventListener('click', () => {
-            gameboard.removeShip(ship);
-            renderBoard(gameboard, cont, boardCont);
-            squareClicks(boardCont, gameboard, ship, shipDirection, cont);
-        })
-        dialog.appendChild(removeShip);
+    //         if (shipAdd === 10) {
+    //             cont.remove();
+    //         }
+    //     })
+    //     dialog.appendChild(setShip);
 
-        document.body.appendChild(dialog);
+    //     const removeShip = document.createElement('button');
+    //     removeShip.type = "button";
+    //     removeShip.textContent = "Remove ship";
+    //     removeShip.addEventListener('click', () => {
+    //         gameboard.removeShip(ship);
+    //         renderBoard(gameboard, cont, boardCont);
+    //         squareClicks(boardCont, gameboard, ship, shipDirection, cont);
+    //     })
+    //     dialog.appendChild(removeShip);
 
-        const placeShip = document.createElement('button');
-        placeShip.textContent = "Place Ship";
-        placeShip.addEventListener('click', () => {
-            renderBoard(gameboard, cont, boardCont);
-            squareClicks(boardCont, gameboard, ship, shipDirection, cont);
-            dialog.showModal();
+    //     document.body.appendChild(dialog);
+
+    //     const placeShip = document.createElement('button');
+    //     placeShip.textContent = "Place Ship";
+    //     placeShip.addEventListener('click', () => {
+    //         renderBoard(gameboard, cont, boardCont);
+    //         squareClicks(boardCont, gameboard, ship, shipDirection, cont);
+    //         dialog.showModal();
             
-        })
-        shipCont.appendChild(placeShip);
-    })
+    //     })
+    //     shipCont.appendChild(placeShip);
+    // })
 }
 
 function squareClicks(boardCont, gameboard, ship, shipDirection, cont) {
     const squares = boardCont.childNodes;
     squares.forEach(square => {
     square.addEventListener('click', () => {
-        console.log("clicked");
         const coordString = square.dataset.myArray;
         const coord = JSON.parse(coordString);
         const x = coord[0];
@@ -170,12 +175,10 @@ function squareClicks(boardCont, gameboard, ship, shipDirection, cont) {
         const validPlacement = gameboard.placeShip(ship, x, y, direction);
 
         if (validPlacement === "Invalid position") {
-            console.log("not placed");
             alert(validPlacement);
             
         }
         else {
-            console.log("placed");
             renderBoard(gameboard, cont, boardCont);
             renderBoard(gameboard, cont, playerBoardCont); 
         }
@@ -192,6 +195,7 @@ function dragAndDrop(gameboard, boardCont) {
     let anchorOffsetX = 0;
     let anchorOffsetY = 0;
     let validPlacement;
+    let dragPieces = [];
     
     boardCont.addEventListener('pointerdown', (e) => {
         if (!e.target.classList.contains('ship')) return;
@@ -205,6 +209,26 @@ function dragAndDrop(gameboard, boardCont) {
         ];
 
         relatedPieces.forEach((piece) => {
+            piece.style.pointerEvents = "none";
+        })
+
+        dragPieces = relatedPieces.map(piece => {
+            const clone = piece.cloneNode(true);
+            const rect = piece.getBoundingClientRect();
+            const boardRect = boardCont.getBoundingClientRect();
+
+            clone.classList.add("drag-preview");
+
+            clone.style.width = `${rect.width}px`;
+            clone.style.height = `${rect.height}px`;
+            clone.style.left = `${rect.left - boardRect.left}px`;
+            clone.style.top = `${rect.top - boardRect.top}px`;
+
+            boardCont.appendChild(clone);
+            return clone;
+        });
+
+        relatedPieces.forEach(piece => {
             piece.style.pointerEvents = "none";
         })
 
@@ -243,7 +267,7 @@ function dragAndDrop(gameboard, boardCont) {
         const shipId = activePiece.dataset.shipId;
         const relatedPieces = boardCont.querySelectorAll(`[data-ship-id="${shipId}"]`);
 
-        relatedPieces.forEach(piece => {
+        dragPieces.forEach(piece => {
             const currentLeft = parseFloat(piece.style.left) || 0;
             const currentTop = parseFloat(piece.style.top) || 0;
 
@@ -347,6 +371,9 @@ function dragAndDrop(gameboard, boardCont) {
 
     boardCont.addEventListener('pointerup', (e) => {
         if (!activePiece) return;
+
+        dragPieces.forEach(piece => piece.remove());
+        dragPieces = [];
 
         const anchorX = e.clientX + anchorOffsetX;
         const anchorY = e.clientY + anchorOffsetY;
@@ -510,7 +537,7 @@ export function createPlayer(container) {
 
         const player = new Player(playerType.value, input.value);
         player.playerBoard.createBoard();
-        // player.playerBoard.placeShipDefault();
+        player.playerBoard.placeShipDefault();
         renderShips(player.playerBoard, shipCont);
         renderBoard(player.playerBoard, playerCont, playerBoardCont);
 
@@ -534,7 +561,7 @@ export function createPlayer(container) {
 
             const computer = new Player('computer', 'computer');
             computer.playerBoard.createBoard();
-            computer.playerBoard.placeShipDefault();
+            computer.playerBoard.randomPlacement();
             renderOppBoard(computer.playerBoard, playerCont, oppBoardCont);
 
             const image = document.createElement("img");

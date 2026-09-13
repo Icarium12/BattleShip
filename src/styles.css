@@ -86,3 +86,10 @@ img {
     border: 1px solid black;
     padding: 5px;
 }
+
+.drag-preview {
+    position: absolute;
+    box-sizing: border-box;
+    z-index: 10;
+    pointer-events: none;
+}
