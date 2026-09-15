@@ -695,3 +695,88 @@ export function createPlayer(container) {
     document.body.append(dialog);
     dialog.showModal();
 }
+
+export function multiplayer(container) {
+    const dialog = document.createElement('dialog');
+    document.body.appendChild(dialog);
+
+    const form = document.createElement('form');
+    form.className = "playerForm";
+
+    const player1Label = document.createElement('label');
+    player1Label.textContent = "Player1 Name:";
+    form.appendChild(player1Label);
+
+    const input1 = document.createElement('input');
+    input1.type = 'text';
+    input1.required = true;
+    input1.addEventListener('change', () => {
+        if (input1.value.trim() === '') {
+            input1.setCustomValidity("Field cannot be empty");
+            input1.reportValidity();
+        }
+        else {
+            input1.setCustomValidity("");
+        }
+    });
+    form.appendChild(input1);
+
+    const player2Label = document.createElement('label');
+    player2Label.textContent = "Player2 Name:";
+    form.appendChild(player2Label);
+
+    const input2 = document.createElement('input');
+    input2.type = 'text';
+    input2.required = true;
+    input2.addEventListener('change', () => {
+        if (input2.value.trim() === '') {
+            input2.setCustomValidity("Field cannot be empty");
+            input2.reportValidity();
+        }
+        else {
+            input2.setCustomValidity("");
+        }
+    });
+    form.appendChild(input2);
+
+    const submit = document.createElement('button');
+    submit.textContent = "Submit";
+    submit.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (form.checkValidity()) {
+            async function playerSetup() {
+
+                dialog.close();
+                const player1 = new Player("user", input1.value);
+                player1.playerBoard.createBoard();
+
+                const player2 = new Player("user", input2.value);
+                player2.playerBoard.createBoard();
+
+                const title = document.createElement('div');
+                title.textContent = `${player1.name} place and comfirm your ships`;
+                container.appendChild(title);
+                
+                player1.playerBoard.placeShipDefault();
+                renderBoard(player1.playerBoard.board, null, playerBoardCont);
+                renderShips(player1.playerBoard, shipCont);
+                dragAndDrop(player1.playerBoard, playerBoardCont);
+
+                const confirm = document.createElement('button');
+                confirm.textContent = "Confirm text content";
+                container.appendChild(confirm);
+
+                await waitForClick(confirm);
+
+                title.textContent = `${player2.name} place and comfirm your ships`;
+            }
+            playerSetup();
+        }
+        else {
+            form.reportValidity();
+        }
+    })
+    form.appendChild(submit);
+    dialog.appendChild(form);
+    dialog.showModal();
+} 

@@ -1,4 +1,4 @@
-import { renderBoard, createPlayer } from "./dom";
+import { renderBoard, createPlayer, multiplayer } from "./dom";
 import { Gameboard } from "./gameboard";
 import { Player } from "./player";
 import "./styles.css";
@@ -10,11 +10,18 @@ title.textContent = "BattleShip Game";
 body.append(title);
 
 const button1 = document.createElement('button');
-button1.textContent = "Create Player";
+button1.textContent = "Single Player";
 button1.addEventListener('click', () => {
     const player = createPlayer(playerCont);
 }, { once: true});
 body.appendChild(button1);
+
+const button2 = document.createElement('button');
+button2.textContent = "Multiplayer";
+button2.addEventListener('click', () => {
+    multiplayer(playerCont);
+});
+body.appendChild(button2);
 
 export const playerCont = document.createElement('div');
 playerCont.className = "player-cont";
