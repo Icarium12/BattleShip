@@ -22,9 +22,15 @@ export function renderBoard(gameboard, container, boardCont) {
                 square.dataset.shipId = boardArray[i][j].value.id
                 square.style.border = "2px solid blue";
                 square.classList.add("square",'ship');
+                if (boardArray[i][j].hit) {
+                    square.textContent = "X";
+                }
             }
             else {
                 square.style.border = "1px solid black";
+                if (boardArray[i][j].hit) {
+                    square.textContent = ".";
+                }
             }
 
             boardCont.append(square);
@@ -53,20 +59,29 @@ export function renderOppBoard(gameboard, container, boardCont) {
             square.style.border = "1px solid black";
             
             boardCont.append(square);
+            if (boardArray[i][j].hasShip) {
+                if (boardArray[i][j].hit) {
+                    square.textContent = "X";
+                }
+            }
+            else {
+                if (boardArray[i][j].hit) {
+                    square.textContent = ".";
+                }
+            }
         }
         
     } 
     // container.append(boardCont);
 }
 
-function renderShips(gameboard, cont) {
-    let shipAdd = 0;
-    
+function renderShips(gameboard, cont, boardCont) {
     const random = document.createElement('button');
+
     random.textContent = "Randomize Placement";
     random.addEventListener('click', () => {
         gameboard.placeShipRandom();
-        renderBoard(gameboard, cont, playerBoardCont);
+        renderBoard(gameboard, cont, boardCont);
         playerCont.prepend(random);
         cont.remove();
     })
@@ -538,7 +553,7 @@ export function createPlayer(container) {
         const player = new Player(playerType.value, input.value);
         player.playerBoard.createBoard();
         player.playerBoard.placeShipDefault();
-        renderShips(player.playerBoard, shipCont);
+        renderShips(player.playerBoard, shipCont, playerBoardCont);
         renderBoard(player.playerBoard, playerCont, playerBoardCont);
 
         dragAndDrop(player.playerBoard, playerBoardCont);
@@ -561,7 +576,7 @@ export function createPlayer(container) {
 
             const computer = new Player('computer', 'computer');
             computer.playerBoard.createBoard();
-            computer.playerBoard.randomPlacement();
+            computer.playerBoard.placeShipRandom();
             renderOppBoard(computer.playerBoard, playerCont, oppBoardCont);
 
             const image = document.createElement("img");
@@ -696,6 +711,37 @@ export function createPlayer(container) {
     dialog.showModal();
 }
 
+
+function startGame(container, player1, player2) {
+    const gameState = {
+        activePlayer: 1,
+        boardOwner: 2
+    }
+
+    const player1Cont = document.createElement('div');
+    player1Cont.classList("show");
+
+    container.appendChild(player1Cont);
+
+    const myBoard = document.createElement('div');
+    myBoard.classList("gameboard");
+    player1Cont.appendChild(myBoard);
+    renderBoard(player1.playerBoard, null, myBoard);
+
+    const oppBoard = document.createElement('div');
+    oppBoard.classList("gameboard");
+    player1Cont.appendChild(oppBoard);
+    renderOppBoard(player2.playerBoard, null, oppBoard);
+
+    const image = document.createElement("img");
+    image.src = targetImg;
+
+    const fireBtn = document.createElement('button');
+    fireBtn.textContent = "fire";
+    fireBtn.disabled = true
+
+}
+
 export function multiplayer(container) {
     const dialog = document.createElement('dialog');
     document.body.appendChild(dialog);
@@ -759,16 +805,47 @@ export function multiplayer(container) {
                 
                 player1.playerBoard.placeShipDefault();
                 renderBoard(player1.playerBoard.board, null, playerBoardCont);
-                renderShips(player1.playerBoard, shipCont);
+                renderShips(player1.playerBoard, shipCont, playerBoardCont);
                 dragAndDrop(player1.playerBoard, playerBoardCont);
 
                 const confirm = document.createElement('button');
-                confirm.textContent = "Confirm text content";
+                confirm.textContent = "Confirm placement";
                 container.appendChild(confirm);
 
                 await waitForClick(confirm);
 
-                title.textContent = `${player2.name} place and comfirm your ships`;
+                container.replaceChildren();
+                const switchScreen = document.createElement("div");
+
+                title.textContent = `${player2.name} press ready to set up your ships`;
+                switchScreen.appendChild(title);
+
+                confirm.textContent = "Ready";
+                switchScreen.appendChild(confirm);
+
+                container.appendChild(switchScreen);
+
+                await waitForClick(confirm);
+
+                container.replaceChildren();
+                
+                container.appendChild(shipCont);
+                container.appendChild(playerBoardCont);
+
+                const player2BoardCont = playerBoardCont.cloneNode(false);
+                playerBoardCont.parentNode.replaceChild(player2BoardCont, playerBoardCont);
+                
+                player2.playerBoard.placeShipDefault();
+                renderBoard(player2.playerBoard.board, null, player2BoardCont);
+                renderShips(player2.playerBoard, shipCont, player2BoardCont);
+                dragAndDrop(player2.playerBoard, player2BoardCont);
+
+                confirm.textContent = "Confirm placement";
+                container.appendChild(confirm);
+
+                await waitForClick(confirm);
+
+                
             }
             playerSetup();
         }
