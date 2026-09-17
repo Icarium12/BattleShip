@@ -719,27 +719,129 @@ function startGame(container, player1, player2) {
     }
 
     const player1Cont = document.createElement('div');
-    player1Cont.classList("show");
+    player1Cont.classList.add("player-cont");
+
+    const player2Cont = document.createElement('div');
+    player2Cont.classList.add("hide");
 
     container.appendChild(player1Cont);
 
-    const myBoard = document.createElement('div');
-    myBoard.classList("gameboard");
-    player1Cont.appendChild(myBoard);
-    renderBoard(player1.playerBoard, null, myBoard);
+    const p1Board = document.createElement('div');
+    p1Board.classList.add("gameboard");
+    player1Cont.appendChild(p1Board);
+    renderBoard(player1.playerBoard, null, p1Board);
 
-    const oppBoard = document.createElement('div');
-    oppBoard.classList("gameboard");
-    player1Cont.appendChild(oppBoard);
-    renderOppBoard(player2.playerBoard, null, oppBoard);
+    const opp1Board = document.createElement('div');
+    opp1Board.classList.add("gameboard");
+    player1Cont.appendChild(opp1Board);
+    renderOppBoard(player2.playerBoard, null, opp1Board);
+
+    const p2Board = document.createElement('div');
+    p2Board.classList.add("gameboard");
+    player2Cont.appendChild(p2Board);
+    renderBoard(player2.playerBoard, null, p2Board);
+
+    const opp2Board = document.createElement('div');
+    opp2Board.classList.add("gameboard");
+    player2Cont.appendChild(opp2Board);
+    renderOppBoard(player1.playerBoard, null, opp2Board);
+
+    const switchScreen = document.createElement('div');
+    switchScreen.classList.add("hide");
+    const switchText = document.createElement('div');
+    switchScreen.appendChild(switchText);
+    const switchButton = document.createElement("button");
+    switchButton.textContent = "Ready";
+    switchButton.addEventListener('click', () => {
+        if (gameState.activePlayer === 1) {
+            // player2Cont.classList.add("hide");
+            switchScreen.classList.add("hide");
+            player1Cont.classList.remove("hide");
+
+        }
+        else if (gameState.activePlayer === 2) {
+            switchScreen.classList.add("hide");
+            player2Cont.classList.remove("hide");
+        }
+    })
+    switchScreen.appendChild(switchButton);
+    container.appendChild(switchScreen);
 
     const image = document.createElement("img");
     image.src = targetImg;
 
     const fireBtn = document.createElement('button');
     fireBtn.textContent = "fire";
-    fireBtn.disabled = true
+    fireBtn.disabled = true;
 
+    let selectedSquare1 = null;
+
+    fireBtn.addEventListener('click', () => {
+        if (!selectedSquare1) return;
+        if (gameState.activePlayer !== 1 || gameState.boardOwner !== 2) return;
+
+        const coord = JSON.parse(selectedSquare1.dataset.myArray);
+        const cell = player2.playerBoard.board[coord[0]][coord[1]];
+
+        if (cell.hit) return;
+
+        gameState.activePlayer = 2;
+        gameState.boardOwner = 1;
+
+        hit(coord[0], coord[1], player2.playerBoard);
+
+        if (cell.hasShip) {
+            const ship = cell.value;
+            selectedSquare1.textContent = "X";
+            selectedSquare1.style.border = "2px solid red";
+
+            gameState.activePlayer = 1;
+            gameState.boardOwner = 2;
+
+            if (ship.sunk) {
+                ship.boundary.forEach(([x ,y]) => {
+                    player2.playerBoard.board[x][y].hit = true;
+                    const boundarySquare = [...oppBoardCont.children].find(square => {
+                        const [squareX, squareY] = JSON.parse(square.dataset.myArray);
+                        return squareX === x && squareY === y;
+                    })
+
+                    if (boundarySquare) {
+                        boundarySquare.textContent = ".";
+                    }
+                })
+            }
+        }
+        else {
+            selectedSquare1.textContent = ".";
+            oppBoardCont.style.backgroundColor = "#f5f5f5";
+            playerBoardCont.style.backgroundColor = "#ffffff";
+            oppBoardCont.style.pointerEvents = "none";
+            setTimeout(() => {
+                oppBoardCont.style.pointerEvents = 'auto';
+                player1Cont.classList.add('hide');
+                switchText.textContent = `Pass device to ${player2.name}`;
+                switchScreen.classList.remove('hide');    
+            }, 2000);
+            
+        }
+    });
+     
+    opp1Board.appendChild(fireBtn);
+
+    const opp1Squares = opp1Board.querySelectorAll(".square");
+    opp1Squares.forEach(square => {
+        square.addEventListener('click', () => {
+            const coord = JSON.parse(square.dataset.myArray);
+            const cell = player2.playerBoard.board[coord[0]][coord[1]];
+
+            if (cell.hit) return;
+            selectedSquare1 = square;
+            image.remove();
+            square.appendChild(image);
+            fireBtn.disabled = false;
+        })
+    })
 }
 
 export function multiplayer(container) {
@@ -844,6 +946,10 @@ export function multiplayer(container) {
                 container.appendChild(confirm);
 
                 await waitForClick(confirm);
+
+                container.replaceChildren();
+
+                startGame(container, player1, player2);
 
                 
             }

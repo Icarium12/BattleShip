@@ -93,3 +93,7 @@ img {
     z-index: 10;
     pointer-events: none;
 }
+
+.hide {
+    display: none;
+}
