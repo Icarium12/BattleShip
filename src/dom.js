@@ -641,14 +641,7 @@ export function createPlayer(container) {
             const oppSquares = oppBoardCont.querySelectorAll(".square");
             oppSquares.forEach(square => {
                 square.addEventListener("click", () => {
-                    const coord = JSON.parse(square.dataset.myArray);
-                    const cell = computer.playerBoard.board[coord[0]][coord[1]];
-
-                    if (cell.hit) return;
-                    selectedSquare = square;
-                    image.remove();
-                    square.appendChild(image);
-                    fireBtn.disabled = false;
+                    selectedSquare = setTarget(square, image, fireBtn, computer);
                 })
 
                 
@@ -666,44 +659,6 @@ export function createPlayer(container) {
         })
         container.appendChild(start);
 
-        // Receiving attack
-        
-        // playerBoardCont.style.backgroundColor =  "#f5f5f5";
-        // const squares = playerBoardCont.childNodes;
-        // squares.forEach(square => {
-        //     square.addEventListener('click', () => {
-        //         if (gameState.activePlayer === 2 && gameState.boardOwner === 1) {
-        //             gameState.activePlayer = 1;
-        //             gameState.boardOwner = 2;
-        //             const coordString = square.dataset.myArray;
-        //             const coord = JSON.parse(coordString);
-        //             hit(coord[0], coord[1], player.playerBoard);
-        //             if (player.playerBoard.board[coord[0]][coord[1]].hit === true && player.playerBoard.board[coord[0]][coord[1]].hasShip === true) {
-        //                 square.textContent = "X";
-        //                 gameState.activePlayer = 2;
-        //                 gameState.boardOwner = 1;
-        //                 return;
-        //             }
-        //             else if(player.playerBoard.board[coord[0]][coord[1]].hit === true && player.playerBoard.board[coord[0]][coord[1]].hasShip === false) {
-        //                 square.textContent = ".";
-        //             }
-        //             playerBoardCont.style.backgroundColor =  "#f5f5f5";
-        //             oppBoardCont.style.backgroundColor = "#ffffff"; 
-        //         }
-        //         // renderBoard(player.playerBoard, playerCont, playerBoardCont);
-        //     })
-            
-        // })
-        
-
-        // oppBoardCont.addEventListener('click', () => {
-        //     let win = computer.playerBoard.checkShipSunk();
-        //         if (win !== null) {
-        //             winPopup.classList.add('show');
-        //             playerCont.appendChild(winPopup);
-        //             playerCont.style.pointerEvents = 'none';
-        //         }
-        // })
     });
     form.appendChild(button);
     dialog.appendChild(form);
@@ -722,9 +677,11 @@ function startGame(container, player1, player2) {
     player1Cont.classList.add("player-cont");
 
     const player2Cont = document.createElement('div');
+    player2Cont.classList.add("player-cont");
     player2Cont.classList.add("hide");
 
     container.appendChild(player1Cont);
+    container.appendChild(player2Cont);
 
     const p1Board = document.createElement('div');
     p1Board.classList.add("gameboard");
@@ -777,54 +734,7 @@ function startGame(container, player1, player2) {
     let selectedSquare1 = null;
 
     fireBtn.addEventListener('click', () => {
-        if (!selectedSquare1) return;
-        if (gameState.activePlayer !== 1 || gameState.boardOwner !== 2) return;
-
-        const coord = JSON.parse(selectedSquare1.dataset.myArray);
-        const cell = player2.playerBoard.board[coord[0]][coord[1]];
-
-        if (cell.hit) return;
-
-        gameState.activePlayer = 2;
-        gameState.boardOwner = 1;
-
-        hit(coord[0], coord[1], player2.playerBoard);
-
-        if (cell.hasShip) {
-            const ship = cell.value;
-            selectedSquare1.textContent = "X";
-            selectedSquare1.style.border = "2px solid red";
-
-            gameState.activePlayer = 1;
-            gameState.boardOwner = 2;
-
-            if (ship.sunk) {
-                ship.boundary.forEach(([x ,y]) => {
-                    player2.playerBoard.board[x][y].hit = true;
-                    const boundarySquare = [...oppBoardCont.children].find(square => {
-                        const [squareX, squareY] = JSON.parse(square.dataset.myArray);
-                        return squareX === x && squareY === y;
-                    })
-
-                    if (boundarySquare) {
-                        boundarySquare.textContent = ".";
-                    }
-                })
-            }
-        }
-        else {
-            selectedSquare1.textContent = ".";
-            oppBoardCont.style.backgroundColor = "#f5f5f5";
-            playerBoardCont.style.backgroundColor = "#ffffff";
-            oppBoardCont.style.pointerEvents = "none";
-            setTimeout(() => {
-                oppBoardCont.style.pointerEvents = 'auto';
-                player1Cont.classList.add('hide');
-                switchText.textContent = `Pass device to ${player2.name}`;
-                switchScreen.classList.remove('hide');    
-            }, 2000);
-            
-        }
+        fire(selectedSquare1, gameState, player2, 1, 2, player1Cont, opp1Board, switchText, switchScreen, p2Board);
     });
      
     opp1Board.appendChild(fireBtn);
@@ -832,16 +742,90 @@ function startGame(container, player1, player2) {
     const opp1Squares = opp1Board.querySelectorAll(".square");
     opp1Squares.forEach(square => {
         square.addEventListener('click', () => {
-            const coord = JSON.parse(square.dataset.myArray);
-            const cell = player2.playerBoard.board[coord[0]][coord[1]];
+            selectedSquare1 = setTarget(square, image, fireBtn, player2);
+        });
+    });
 
-            if (cell.hit) return;
-            selectedSquare1 = square;
-            image.remove();
-            square.appendChild(image);
-            fireBtn.disabled = false;
+    let selectedSquare2 = null;
+
+    const fireBtn2 = fireBtn.cloneNode(true);
+    fireBtn2.addEventListener('click', () => {
+        fire(selectedSquare2, gameState, player1, 2, 1, player2Cont, opp2Board, switchText, switchScreen, p1Board);
+    });
+
+    opp2Board.appendChild(fireBtn2);
+
+    const opp2Squares = opp2Board.querySelectorAll(".square");
+    opp2Squares.forEach(square => {
+        square.addEventListener('click', () => {
+            selectedSquare2 = setTarget(square, image, fireBtn2, player1);
         })
     })
+}
+
+function setTarget(square, image, btn, player) {
+    const coord = JSON.parse(square.dataset.myArray);
+    const cell = player.playerBoard.board[coord[0]][coord[1]];
+
+    if (cell.hit) return;
+
+    image.remove();
+    square.appendChild(image);
+    btn.disabled = false;
+
+    return square;
+}
+
+function fire(selectedSquare, gameState, player, playerNum, oppNumber, playerCont, oppCont, switchText, switchScreen, playerBoard) {
+    if (!selectedSquare) return;
+    if (gameState.activePlayer !== playerNum || gameState.boardOwner !== oppNumber) return;
+
+    const coord = JSON.parse(selectedSquare.dataset.myArray);
+    const cell = player.playerBoard.board[coord[0]][coord[1]];
+
+    if (cell.hit) return;
+
+    hit(coord[0], coord[1], player.playerBoard);
+
+    if (cell.hasShip) {
+        const ship = cell.value;
+        selectedSquare.textContent = "X";
+        selectedSquare.style.border = "2px solid red";
+
+        gameState.activePlayer = playerNum;
+        gameState.boardOwner = oppNumber;
+
+        if (ship.sunk) {
+            ship.boundary.forEach(([x, y]) => {
+                player.playerBoard.board[x][y].hit = true;
+                const boundarySquare = [...oppCont.children].find(square => {
+                    const [squareX, squareY] = JSON.parse(square.dataset.myArray);
+                    return squareX === x && squareY === y;
+                })
+
+                if (boundarySquare) {
+                    boundarySquare.textContent = ".";
+                }
+            })
+        }
+    }
+
+    else {
+        selectedSquare.textContent = ".";
+
+        gameState.activePlayer = oppNumber;
+        gameState.boardOwner = playerNum;
+
+        oppCont.style.pointerEvents = "none";
+        setTimeout(() => {
+            oppCont.style.pointerEvents = 'auto';
+            playerCont.classList.add('hide');
+            switchText.textContent = `Pass device to ${player.name}`;
+            switchScreen.classList.remove('hide');    
+        }, 1000);
+    }
+
+    renderBoard(player.playerBoard, null, playerBoard);
 }
 
 export function multiplayer(container) {
