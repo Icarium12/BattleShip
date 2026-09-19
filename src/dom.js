@@ -523,6 +523,16 @@ export function createPlayer(container) {
 
     const input = document.createElement('input');
     input.type = 'text';
+    input.required = true;
+    input.addEventListener("change", () => {
+        if (input.value.trim() === '') {
+            input.setCustomValidity("Field cannot be empty");
+            form.reportValidity();
+        }
+        else {
+            input.setCustomValidity("");
+        }
+    })
     form.appendChild(input);
 
     const typeLabel = document.createElement('label');
@@ -547,117 +557,120 @@ export function createPlayer(container) {
     button.textContent = "Start";
     button.type = "button";
     button.addEventListener('click', () => {
-        dialog.close();
+        if (form.checkValidity()) {
+
+            dialog.close();
 
 
-        const player = new Player(playerType.value, input.value);
-        player.playerBoard.createBoard();
-        player.playerBoard.placeShipDefault();
-        renderShips(player.playerBoard, shipCont, playerBoardCont);
-        renderBoard(player.playerBoard, playerCont, playerBoardCont);
+            const player = new Player(playerType.value, input.value);
+            player.playerBoard.createBoard();
+            player.playerBoard.placeShipDefault();
+            renderShips(player.playerBoard, shipCont, playerBoardCont);
+            renderBoard(player.playerBoard, playerCont, playerBoardCont);
 
-        dragAndDrop(player.playerBoard, playerBoardCont);
+            dragAndDrop(player.playerBoard, playerBoardCont);
 
-        const start = document.createElement('button');
-        start.textContent = "Start Game";
-        start.addEventListener("click", () => {
-            const buttons = container.querySelectorAll('button');
+            const start = document.createElement('button');
+            start.textContent = "Start Game";
+            start.addEventListener("click", () => {
+                const buttons = container.querySelectorAll('button');
 
-            buttons.forEach(button => {
-                button.remove();
-            });
+                buttons.forEach(button => {
+                    button.remove();
+                });
 
-            playerBoardCont.style.pointerEvents = 'none';
+                playerBoardCont.style.pointerEvents = 'none';
 
-            const gameState = {
-                activePlayer: 1,
-                boardOwner: 2,
-            }
+                const gameState = {
+                    activePlayer: 1,
+                    boardOwner: 2,
+                }
 
-            const computer = new Player('computer', 'computer');
-            computer.playerBoard.createBoard();
-            computer.playerBoard.placeShipRandom();
-            renderOppBoard(computer.playerBoard, playerCont, oppBoardCont);
+                const computer = new Player('computer', 'computer');
+                computer.playerBoard.createBoard();
+                computer.playerBoard.placeShipRandom();
+                renderOppBoard(computer.playerBoard, playerCont, oppBoardCont);
 
-            const image = document.createElement("img");
-            image.src = targetImg;
+                const image = document.createElement("img");
+                image.src = targetImg;
 
-            const fireBtn = document.createElement('button');
-            fireBtn.textContent = "fire";
-            fireBtn.disabled = true;
+                const fireBtn = document.createElement('button');
+                fireBtn.textContent = "fire";
+                fireBtn.disabled = true;
 
-            let selectedSquare = null;
+                let selectedSquare = null;
 
-            fireBtn.addEventListener("click", () => {
-                if (!selectedSquare) return;
-                if (gameState.activePlayer !== 1 || gameState.boardOwner !== 2) return;
+                fireBtn.addEventListener("click", () => {
+                    if (!selectedSquare) return;
+                    if (gameState.activePlayer !== 1 || gameState.boardOwner !== 2) return;
 
-                const coord = JSON.parse(selectedSquare.dataset.myArray);
-                const cell = computer.playerBoard.board[coord[0]][coord[1]];
-                
+                    const coord = JSON.parse(selectedSquare.dataset.myArray);
+                    const cell = computer.playerBoard.board[coord[0]][coord[1]];
+                    
 
-                if (cell.hit) return;
+                    if (cell.hit) return;
 
-                gameState.activePlayer = 2;
-                gameState.boardOwner = 1;
+                    gameState.activePlayer = 2;
+                    gameState.boardOwner = 1;
 
-                hit(coord[0], coord[1], computer.playerBoard);
+                    hit(coord[0], coord[1], computer.playerBoard);
 
-                if (cell.hasShip) {
-                    const ship = cell.value;
-                    selectedSquare.textContent = "X";
-                    selectedSquare.style.border = "2px solid red";
+                    if (cell.hasShip) {
+                        const ship = cell.value;
+                        selectedSquare.textContent = "X";
+                        selectedSquare.style.border = "2px solid red";
 
-                    gameState.activePlayer = 1;
-                    gameState.boardOwner = 2;
+                        gameState.activePlayer = 1;
+                        gameState.boardOwner = 2;
 
-                    if (ship.sunk) {
-                        ship.boundary.forEach(([x ,y]) => {
-                            computer.playerBoard.board[x][y].hit = true;
-                            const boundarySquare = [...oppBoardCont.children].find(square => {
-                                const [squareX, squareY] = JSON.parse(square.dataset.myArray);
-                                return squareX === x && squareY === y;
+                        if (ship.sunk) {
+                            ship.boundary.forEach(([x ,y]) => {
+                                computer.playerBoard.board[x][y].hit = true;
+                                const boundarySquare = [...oppBoardCont.children].find(square => {
+                                    const [squareX, squareY] = JSON.parse(square.dataset.myArray);
+                                    return squareX === x && squareY === y;
+                                })
+
+                                if (boundarySquare) {
+                                    boundarySquare.textContent = ".";
+                                }
                             })
-
-                            if (boundarySquare) {
-                                boundarySquare.textContent = ".";
-                            }
-                        })
+                        }
                     }
-                }
-                else {
-                    selectedSquare.textContent = ".";
-                    oppBoardCont.style.backgroundColor = "#f5f5f5";
-                    playerBoardCont.style.backgroundColor = "#ffffff";
+                    else {
+                        selectedSquare.textContent = ".";
+                        oppBoardCont.style.backgroundColor = "#f5f5f5";
+                        playerBoardCont.style.backgroundColor = "#ffffff";
 
-                    setTimeout(() => {
-                        computerMove(player.playerBoard, oppBoardCont, playerBoardCont, gameState);
-                    }, 1000);
-                }
-            });
+                        setTimeout(() => {
+                            computerMove(player.playerBoard, oppBoardCont, playerBoardCont, gameState);
+                        }, 1000);
+                    }
+                });
 
-            oppBoardCont.appendChild(fireBtn);
+                oppBoardCont.appendChild(fireBtn);
 
-            const oppSquares = oppBoardCont.querySelectorAll(".square");
-            oppSquares.forEach(square => {
-                square.addEventListener("click", () => {
-                    selectedSquare = setTarget(square, image, fireBtn, computer);
+                const oppSquares = oppBoardCont.querySelectorAll(".square");
+                oppSquares.forEach(square => {
+                    square.addEventListener("click", () => {
+                        selectedSquare = setTarget(square, image, fireBtn, computer);
+                    })
+
+                    
+                    
+                });
+
+                oppBoardCont.addEventListener('click', () => {
+                    let win = computer.playerBoard.checkShipSunk();
+                    checkWin(win);
                 })
-
-                
-                
-            });
-
-            oppBoardCont.addEventListener('click', () => {
-                let win = computer.playerBoard.checkShipSunk();
-                    if (win !== null) {
-                        winPopup.classList.add('show');
-                        playerCont.appendChild(winPopup);
-                        playerCont.style.pointerEvents = 'none';
-                    }
             })
-        })
-        container.appendChild(start);
+            container.appendChild(start);   
+        }
+        else {
+            form.reportValidity();
+        }
+        
 
     });
     form.appendChild(button);
@@ -666,6 +679,13 @@ export function createPlayer(container) {
     dialog.showModal();
 }
 
+function checkWin(win) {
+    if (win !== null) {
+        winPopup.classList.add('show');
+        playerCont.appendChild(winPopup);
+        playerCont.style.pointerEvents = 'none';
+    }
+}
 
 function startGame(container, player1, player2) {
     const gameState = {
@@ -746,6 +766,11 @@ function startGame(container, player1, player2) {
         });
     });
 
+    opp1Board.addEventListener('click', () => {
+        let win = player2.playerBoard.checkShipSunk();
+        checkWin(win);
+    });
+
     let selectedSquare2 = null;
 
     const fireBtn2 = fireBtn.cloneNode(true);
@@ -759,7 +784,12 @@ function startGame(container, player1, player2) {
     opp2Squares.forEach(square => {
         square.addEventListener('click', () => {
             selectedSquare2 = setTarget(square, image, fireBtn2, player1);
-        })
+        });
+    });
+
+    opp2Board.addEventListener('click', () => {
+        let win = player1.playerBoard.checkShipSunk();
+        checkWin(win);
     })
 }
 
@@ -928,6 +958,15 @@ export function multiplayer(container) {
 
                 confirm.textContent = "Confirm placement";
                 container.appendChild(confirm);
+
+                await waitForClick(confirm);
+
+                container.replaceChildren();
+
+                title.textContent = `${player1.name} press start to begin`;
+                confirm.textContent = "Start";
+                switchScreen.appendChild(confirm);
+                container.appendChild(switchScreen);
 
                 await waitForClick(confirm);
 

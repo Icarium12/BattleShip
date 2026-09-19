@@ -20,7 +20,7 @@ const button2 = document.createElement('button');
 button2.textContent = "Multiplayer";
 button2.addEventListener('click', () => {
     multiplayer(playerCont);
-});
+}, {once: true});
 body.appendChild(button2);
 
 export const playerCont = document.createElement('div');
