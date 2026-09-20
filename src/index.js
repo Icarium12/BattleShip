@@ -13,14 +13,14 @@ const button1 = document.createElement('button');
 button1.textContent = "Single Player";
 button1.addEventListener('click', () => {
     const player = createPlayer(playerCont);
-}, { once: true});
+});
 body.appendChild(button1);
 
 const button2 = document.createElement('button');
 button2.textContent = "Multiplayer";
 button2.addEventListener('click', () => {
     multiplayer(playerCont);
-}, {once: true});
+});
 body.appendChild(button2);
 
 export const playerCont = document.createElement('div');

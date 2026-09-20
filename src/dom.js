@@ -443,7 +443,13 @@ function hit(x, y, gameboard) {
     gameboard.receiveAttack(x, y);
 }
 
-function computerMove (gameboard, boardCont, oppBoardCont, gameState) {
+function computerMove (gameboard, 
+                        boardCont, 
+                        oppBoardCont, 
+                        gameState,
+                        x = Math.floor(Math.random() * 10),
+                        y = Math.floor(Math.random() * 10),
+                        direction = null) {
     if (gameState.activePlayer === 2 && gameState.boardOwner === 1) {
         let boardArray;
         if (gameboard && gameboard.board) {
@@ -453,9 +459,7 @@ function computerMove (gameboard, boardCont, oppBoardCont, gameState) {
         }
 
         const squares = oppBoardCont.childNodes;
-        let coord;
-        const x = Math.floor(Math.random() * 10);
-        const y = Math.floor(Math.random() * 10);
+        let coord; 
         
         squares.forEach(square => {
             const coordString = square.dataset.myArray;
@@ -464,7 +468,9 @@ function computerMove (gameboard, boardCont, oppBoardCont, gameState) {
             const y2 = coord[1];
             if (x === x2 && y === y2) {
                 if (boardArray[x][y].hit === true) {
+
                     computerMove(gameboard, boardCont, oppBoardCont, gameState);
+                 
                 }
                 else if (boardArray[x][y].hasShip === true && boardArray[x][y].hit === false) { 
                     hit(x, y, gameboard);
@@ -483,8 +489,28 @@ function computerMove (gameboard, boardCont, oppBoardCont, gameState) {
                             }
                         })
                     }
+                    const decider = Math.round(Math.random());
+                    if (decider === 0) {
+                        direction = "vertical";
+                        if (x + 1 > 9) {
+                            x = x - 1;
+                        }
+                        else {
+                            x = x + 1;
+                        }
+                    }
+                    else {
+                        direction = "horizontal";
+                        if (y + 1 > 9) {
+                            y = y - 1;
+                        }
+                        else {
+                            y = y + 1;
+                        }
+                    }
+
                     setTimeout(() => {
-                        computerMove(gameboard, boardCont, oppBoardCont, gameState);
+                        computerMove(gameboard, boardCont, oppBoardCont, gameState, x, y, direction);
                     }, 1000);
                     
                 }
@@ -515,6 +541,11 @@ function computerMove (gameboard, boardCont, oppBoardCont, gameState) {
 export function createPlayer(container) {
 
     const dialog = document.createElement('dialog');
+    dialog.addEventListener('click', (e) => {
+        if (e.target === dialog) {
+            dialog.close();
+        }
+    })
     const form = document.createElement('form');
     form.className = "playerForm";
     const playerLabel = document.createElement('label');
@@ -574,6 +605,8 @@ export function createPlayer(container) {
             start.textContent = "Start Game";
             start.addEventListener("click", () => {
                 const buttons = container.querySelectorAll('button');
+
+                shipCont.remove();
 
                 buttons.forEach(button => {
                     button.remove();
@@ -662,7 +695,7 @@ export function createPlayer(container) {
 
                 oppBoardCont.addEventListener('click', () => {
                     let win = computer.playerBoard.checkShipSunk();
-                    checkWin(win);
+                    checkWin(win, player);
                 })
             })
             container.appendChild(start);   
@@ -674,14 +707,24 @@ export function createPlayer(container) {
 
     });
     form.appendChild(button);
+
+    const close = document.createElement('button');
+    close.textContent = "Close";
+    close.addEventListener("click", () => {
+        dialog.close();
+        dialog.replaceChildren();
+    });
+    form.appendChild(close);
+
     dialog.appendChild(form);
     document.body.append(dialog);
     dialog.showModal();
 }
 
-function checkWin(win) {
+function checkWin(win, player) {
     if (win !== null) {
         winPopup.classList.add('show');
+        winPopup.textContent = `${player.name} wins`;
         playerCont.appendChild(winPopup);
         playerCont.style.pointerEvents = 'none';
     }
@@ -768,7 +811,7 @@ function startGame(container, player1, player2) {
 
     opp1Board.addEventListener('click', () => {
         let win = player2.playerBoard.checkShipSunk();
-        checkWin(win);
+        checkWin(win, player1);
     });
 
     let selectedSquare2 = null;
@@ -789,7 +832,7 @@ function startGame(container, player1, player2) {
 
     opp2Board.addEventListener('click', () => {
         let win = player1.playerBoard.checkShipSunk();
-        checkWin(win);
+        checkWin(win, player2);
     })
 }
 
@@ -860,6 +903,11 @@ function fire(selectedSquare, gameState, player, playerNum, oppNumber, playerCon
 
 export function multiplayer(container) {
     const dialog = document.createElement('dialog');
+    dialog.addEventListener('click', (e) => {
+        if (e.target === dialog) {
+            dialog.close();
+        }
+    })
     document.body.appendChild(dialog);
 
     const form = document.createElement('form');
@@ -944,6 +992,7 @@ export function multiplayer(container) {
                 await waitForClick(confirm);
 
                 container.replaceChildren();
+                shipCont.replaceChildren();
                 
                 container.appendChild(shipCont);
                 container.appendChild(playerBoardCont);
@@ -963,7 +1012,7 @@ export function multiplayer(container) {
 
                 container.replaceChildren();
 
-                title.textContent = `${player1.name} press start to begin`;
+                title.textContent = `Pass device to ${player1.name} then press start to begin`;
                 confirm.textContent = "Start";
                 switchScreen.appendChild(confirm);
                 container.appendChild(switchScreen);
@@ -983,6 +1032,15 @@ export function multiplayer(container) {
         }
     })
     form.appendChild(submit);
+
+    const close = document.createElement('button');
+    close.textContent = "Close";
+    close.addEventListener("click", () => {
+        dialog.close();
+        dialog.replaceChildren();
+    });
+
+    form.appendChild(close);
     dialog.appendChild(form);
     dialog.showModal();
 } 
