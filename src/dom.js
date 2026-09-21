@@ -1,5 +1,5 @@
 import { Player } from "./player";
-import { playerCont, playerBoardCont, oppBoardCont, winPopup, shipCont } from ".";
+import { playerCont, playerBoardCont, oppBoardCont, winPopup, shipCont, button1, button2 } from ".";
 import targetImg from "./target.jpg";
 
 export function renderBoard(gameboard, container, boardCont) {
@@ -443,97 +443,120 @@ function hit(x, y, gameboard) {
     gameboard.receiveAttack(x, y);
 }
 
+function getAvailableTargets(gameboard, gameState) {
+    const targets = [];
+
+    for (let x = 0; x < 10; x++) {
+        for (let y = 0; y < 10; y++) {
+            const cell = gameboard.board[x][y];
+
+            if (!cell.hit && (x + y) % 2 === 0) {
+                targets.push([x, y]);
+            }
+        }
+    }
+
+    return targets;
+}
+
+function getNeighbors(x, y, gameboard) {
+    const neighbors = [
+        [x - 1, y],
+        [x + 1, y],
+        [x, y - 1],
+        [x, y + 1]
+    ];
+
+    return neighbors.filter(([nextX, nextY]) => 
+        nextX >=0 && nextX < 10 &&
+        nextY >=0 && nextY < 10 &&
+        !gameboard.board[nextX][nextY].hit  
+    );
+}
+
+function chooseTarget(gameboard, gameState) {
+    gameState.compTargets = gameState.compTargets.filter(
+        ([x, y]) => !gameboard.board[x][y].hit
+    );
+
+    if (gameState.compTargets.length > 0) {
+        return gameState.compTargets.shift();
+    }
+
+    const huntTargets = getAvailableTargets(gameboard, gameState);
+
+    if (huntTargets.length > 0) {
+        return huntTargets[Math.floor(Math.random() * huntTargets.length)];
+    }
+
+    return null;
+}
+
 function computerMove (gameboard, 
                         boardCont, 
                         oppBoardCont, 
-                        gameState,
-                        x = Math.floor(Math.random() * 10),
-                        y = Math.floor(Math.random() * 10),
-                        direction = null) {
-    if (gameState.activePlayer === 2 && gameState.boardOwner === 1) {
-        let boardArray;
-        if (gameboard && gameboard.board) {
-            boardArray = gameboard.board;
-        } else {
-            boardArray = gameboard;
+                        gameState) {
+    
+    if(gameState.activePlayer !== 2 || gameState.boardOwner !== 1) return;
+    
+    const target = chooseTarget(gameboard, gameState);
+
+    if (!target) return;
+
+    const [x, y] = target;
+    const cell = gameboard.board[x][y];
+
+    hit (x, y, gameboard);
+
+    const square = [...oppBoardCont.children].find(square => {
+        const coordinates = JSON.parse(square.dataset.myArray);
+        return coordinates[0] === x && coordinates[1] === y;
+    });
+
+    if (cell.hasShip) {
+        square.textContent ="X";
+
+        if (cell.value.sunk) {
+            gameState.compTargets = [];
+            cell.value.boundary.forEach(([x, y]) => {
+                gameboard.board[x][y].hit = true;
+                const boundarySquare = [...oppBoardCont.children].find(square => {
+                    const [squareX, squareY] = JSON.parse(square.dataset.myArray);
+                    return squareX === x && squareY === y;
+                })
+
+                if (boundarySquare) {
+                    boundarySquare.textContent = ".";
+                }
+            });
+
+        } 
+        else {
+            gameState.compTargets.unshift(...getNeighbors(x, y, gameboard));
         }
 
-        const squares = oppBoardCont.childNodes;
-        let coord; 
-        
-        squares.forEach(square => {
-            const coordString = square.dataset.myArray;
-            coord = JSON.parse(coordString);
-            const x2 = coord[0];
-            const y2 = coord[1];
-            if (x === x2 && y === y2) {
-                if (boardArray[x][y].hit === true) {
+        setTimeout(() => {
+            computerMove(gameboard, boardCont, oppBoardCont, gameState);
+        }, 1000);
 
-                    computerMove(gameboard, boardCont, oppBoardCont, gameState);
-                 
-                }
-                else if (boardArray[x][y].hasShip === true && boardArray[x][y].hit === false) { 
-                    hit(x, y, gameboard);
-                    square.textContent = "X";
-                    const ship = boardArray[x][y].value;
-                    if (ship.sunk === true) {
-                        ship.boundary.forEach(([x, y]) => {
-                            boardArray[x][y].hit = true;
-                            const boundarySquare = [...oppBoardCont.children].find(square => {
-                                const [squareX, squareY] = JSON.parse(square.dataset.myArray);
-                                return squareX === x && squareY === y;
-                            })
+        return;
+    }
 
-                            if (boundarySquare) {
-                                boundarySquare.textContent = ".";
-                            }
-                        })
-                    }
-                    const decider = Math.round(Math.random());
-                    if (decider === 0) {
-                        direction = "vertical";
-                        if (x + 1 > 9) {
-                            x = x - 1;
-                        }
-                        else {
-                            x = x + 1;
-                        }
-                    }
-                    else {
-                        direction = "horizontal";
-                        if (y + 1 > 9) {
-                            y = y - 1;
-                        }
-                        else {
-                            y = y + 1;
-                        }
-                    }
+    square.textContent = "."
 
-                    setTimeout(() => {
-                        computerMove(gameboard, boardCont, oppBoardCont, gameState, x, y, direction);
-                    }, 1000);
-                    
-                }
-                else if (boardArray[x][y].hasShip === false && boardArray[x][y].hit === false) {
-                    hit(x, y, gameboard);
-                    square.textContent = ".";
-                    oppBoardCont.style.backgroundColor = "#f5f5f5";
-                    boardCont.style.backgroundColor = "#ffffff";
-                    gameState.activePlayer = 1;
-                    gameState.boardOwner = 2;
-                    return;
-                }
-            }
-        })
+    oppBoardCont.style.backgroundColor = "#f5f5f5";
+    boardCont.style.backgroundColor = "#ffffff";
+    
+    gameState.activePlayer = 1;
+    gameState.boardOwner = 2;
 
-        let win = gameboard.checkShipSunk();
-        if (win != null) {
-            winPopup.style.color = "red";
-            winPopup.textContent = "You lose";
-            winPopup.classList.add('show');
-            playerCont.appendChild(winPopup);
-            playerCont.style.pointerEvents = 'none';
-        }
+    let win = gameboard.checkShipSunk();
+    if (win != null) {
+        winPopup.style.color = "red";
+        winPopup.textContent = "You lose";
+        winPopup.classList.add('show');
+        playerCont.appendChild(winPopup);
+        playerCont.style.pointerEvents = 'none';
     }
      
 }
@@ -566,34 +589,36 @@ export function createPlayer(container) {
     })
     form.appendChild(input);
 
-    const typeLabel = document.createElement('label');
-    typeLabel.textContent = "Player Type:";
-    form.appendChild(typeLabel);
+    // const typeLabel = document.createElement('label');
+    // typeLabel.textContent = "Player Type:";
+    // form.appendChild(typeLabel);
 
-    const playerType = document.createElement('select');
-    playerType.name = "type";
-    const option1 = document.createElement('option');
-    option1.value = "user";
-    option1.textContent = "user";
-    playerType.appendChild(option1);
+    // const playerType = document.createElement('select');
+    // playerType.name = "type";
+    // const option1 = document.createElement('option');
+    // option1.value = "user";
+    // option1.textContent = "user";
+    // playerType.appendChild(option1);
 
-    const option2 = document.createElement('option');
-    option2.value = "computer";
-    option2.textContent = "computer";
-    playerType.appendChild(option2);
+    // const option2 = document.createElement('option');
+    // option2.value = "computer";
+    // option2.textContent = "computer";
+    // playerType.appendChild(option2);
 
-    form.appendChild(playerType);
+    // form.appendChild(playerType);
 
     const button = document.createElement('button');
     button.textContent = "Start";
     button.type = "button";
     button.addEventListener('click', () => {
         if (form.checkValidity()) {
+            button1.remove();
+            button2.remove();
 
             dialog.close();
 
 
-            const player = new Player(playerType.value, input.value);
+            const player = new Player("user", input.value);
             player.playerBoard.createBoard();
             player.playerBoard.placeShipDefault();
             renderShips(player.playerBoard, shipCont, playerBoardCont);
@@ -617,6 +642,7 @@ export function createPlayer(container) {
                 const gameState = {
                     activePlayer: 1,
                     boardOwner: 2,
+                    compTargets: []
                 }
 
                 const computer = new Player('computer', 'computer');
@@ -723,6 +749,16 @@ export function createPlayer(container) {
 
 function checkWin(win, player) {
     if (win !== null) {
+        const playAgn = document.createElement('div');
+        playAgn.textContent = "Play again";
+        winPopup.appendChild(playAgn);
+
+        const sinOrMul = document.createElement('div');
+
+        sinOrMul.appendChild(button1);
+        sinOrMul.appendChild(button2);
+        winPopup.appendChild(sinOrMul);
+
         winPopup.classList.add('show');
         winPopup.textContent = `${player.name} wins`;
         playerCont.appendChild(winPopup);
@@ -955,6 +991,8 @@ export function multiplayer(container) {
         e.preventDefault();
         if (form.checkValidity()) {
             async function playerSetup() {
+                button1.remove();
+                button2.remove();
 
                 dialog.close();
                 const player1 = new Player("user", input1.value);

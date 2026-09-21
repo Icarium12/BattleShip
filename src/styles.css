@@ -43,7 +43,7 @@ img {
     justify-content: center;
     align-items: center;
 
-    background-color: rgba(0, 0, 0, 0.85);
+    /* background-color: rgba(0, 0, 0, 0.85); */
     color: #4CAF50;
     font-size: 32px;
     font-weight: bold;
