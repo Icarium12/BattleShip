@@ -2,7 +2,7 @@ import { Player } from "./player";
 import { playerCont, playerBoardCont, oppBoardCont, winPopup, shipCont, button1, button2 } from ".";
 import targetImg from "./target.jpg";
 
-export function renderBoard(gameboard, container, boardCont) {
+export function renderBoard(gameboard, boardCont) {
     boardCont.replaceChildren();
     boardCont.className = "gameboard";
     let boardArray;
@@ -36,11 +36,10 @@ export function renderBoard(gameboard, container, boardCont) {
             boardCont.append(square);
         }
     }
-    // container.append(boardCont);
-    // document.body.append(container);
+
 }
 
-export function renderOppBoard(gameboard, container, boardCont) {
+export function renderOppBoard(gameboard, boardCont) {
     // const boardCont = document.createElement('div');
     boardCont.className = "gameboard";    
     let boardArray;
@@ -72,7 +71,6 @@ export function renderOppBoard(gameboard, container, boardCont) {
         }
         
     } 
-    // container.append(boardCont);
 }
 
 function renderShips(gameboard, cont, boardCont) {
@@ -81,7 +79,7 @@ function renderShips(gameboard, cont, boardCont) {
     random.textContent = "Randomize Placement";
     random.addEventListener('click', () => {
         gameboard.placeShipRandom();
-        renderBoard(gameboard, cont, boardCont);
+        renderBoard(gameboard, boardCont);
         playerCont.prepend(random);
         cont.remove();
     })
@@ -194,8 +192,8 @@ function squareClicks(boardCont, gameboard, ship, shipDirection, cont) {
             
         }
         else {
-            renderBoard(gameboard, cont, boardCont);
-            renderBoard(gameboard, cont, playerBoardCont); 
+            renderBoard(gameboard, boardCont);
+            renderBoard(gameboard, playerBoardCont); 
         }
 
         })
@@ -419,12 +417,12 @@ function dragAndDrop(gameboard, boardCont) {
                 oldDirection
             )
 
-            renderBoard(gameboard, null, boardCont);
+            renderBoard(gameboard, boardCont);
             activePiece = null;
             
         }
         else {
-            renderBoard(gameboard, null, boardCont);
+            renderBoard(gameboard, boardCont);
             activePiece = null;
         }
     })
@@ -450,7 +448,7 @@ function getAvailableTargets(gameboard, gameState) {
         for (let y = 0; y < 10; y++) {
             const cell = gameboard.board[x][y];
 
-            if (!cell.hit && (x + y) % 2 === 0) {
+            if (!cell.hit) {
                 targets.push([x, y]);
             }
         }
@@ -622,7 +620,7 @@ export function createPlayer(container) {
             player.playerBoard.createBoard();
             player.playerBoard.placeShipDefault();
             renderShips(player.playerBoard, shipCont, playerBoardCont);
-            renderBoard(player.playerBoard, playerCont, playerBoardCont);
+            renderBoard(player.playerBoard, playerBoardCont);
 
             dragAndDrop(player.playerBoard, playerBoardCont);
 
@@ -648,14 +646,24 @@ export function createPlayer(container) {
                 const computer = new Player('computer', 'computer');
                 computer.playerBoard.createBoard();
                 computer.playerBoard.placeShipRandom();
-                renderOppBoard(computer.playerBoard, playerCont, oppBoardCont);
+                renderOppBoard(computer.playerBoard, oppBoardCont);
 
                 const image = document.createElement("img");
                 image.src = targetImg;
 
+                const opponentArea = document.createElement("div");
+                opponentArea.className = "opponent-area";
+
+                opponentArea.appendChild(oppBoardCont);
+
+
                 const fireBtn = document.createElement('button');
+                opponentArea.appendChild(fireBtn);
+                fireBtn.classList.add("fire");
                 fireBtn.textContent = "fire";
                 fireBtn.disabled = true;
+
+                playerCont.appendChild(opponentArea);
 
                 let selectedSquare = null;
 
@@ -707,7 +715,7 @@ export function createPlayer(container) {
                     }
                 });
 
-                oppBoardCont.appendChild(fireBtn);
+                // oppBoardCont.appendChild(fireBtn);
 
                 const oppSquares = oppBoardCont.querySelectorAll(".square");
                 oppSquares.forEach(square => {
@@ -735,6 +743,7 @@ export function createPlayer(container) {
     form.appendChild(button);
 
     const close = document.createElement('button');
+    close.className = "close";
     close.textContent = "Close";
     close.addEventListener("click", () => {
         dialog.close();
@@ -749,20 +758,31 @@ export function createPlayer(container) {
 
 function checkWin(win, player) {
     if (win !== null) {
+        winPopup.textContent = `${player.name} wins`;
+
         const playAgn = document.createElement('div');
         playAgn.textContent = "Play again";
         winPopup.appendChild(playAgn);
 
         const sinOrMul = document.createElement('div');
+        // button1.addEventListener('click', () => {
+        //     createPlayer(playerCont);
+        // });
+
+        // button2.addEventListener('click', () => {
+        //     multiplayer(playerCont);
+        // });
 
         sinOrMul.appendChild(button1);
         sinOrMul.appendChild(button2);
         winPopup.appendChild(sinOrMul);
 
         winPopup.classList.add('show');
-        winPopup.textContent = `${player.name} wins`;
+        
         playerCont.appendChild(winPopup);
-        playerCont.style.pointerEvents = 'none';
+        playerBoardCont.style.pointerEvents = 'none';
+        oppBoardCont.style.pointerEvents = 'none'
+        // playerCont.style.pointerEvents = 'none';
     }
 }
 
@@ -785,22 +805,22 @@ function startGame(container, player1, player2) {
     const p1Board = document.createElement('div');
     p1Board.classList.add("gameboard");
     player1Cont.appendChild(p1Board);
-    renderBoard(player1.playerBoard, null, p1Board);
+    renderBoard(player1.playerBoard, p1Board);
 
     const opp1Board = document.createElement('div');
     opp1Board.classList.add("gameboard");
     player1Cont.appendChild(opp1Board);
-    renderOppBoard(player2.playerBoard, null, opp1Board);
+    renderOppBoard(player2.playerBoard, opp1Board);
 
     const p2Board = document.createElement('div');
     p2Board.classList.add("gameboard");
     player2Cont.appendChild(p2Board);
-    renderBoard(player2.playerBoard, null, p2Board);
+    renderBoard(player2.playerBoard, p2Board);
 
     const opp2Board = document.createElement('div');
     opp2Board.classList.add("gameboard");
     player2Cont.appendChild(opp2Board);
-    renderOppBoard(player1.playerBoard, null, opp2Board);
+    renderOppBoard(player1.playerBoard, opp2Board);
 
     const switchScreen = document.createElement('div');
     switchScreen.classList.add("hide");
@@ -826,7 +846,11 @@ function startGame(container, player1, player2) {
     const image = document.createElement("img");
     image.src = targetImg;
 
+    const opponentArea = document.createElement("div");
+    opponentArea.className = "opponent-area";
+
     const fireBtn = document.createElement('button');
+    fireBtn.classList.add("fire");
     fireBtn.textContent = "fire";
     fireBtn.disabled = true;
 
@@ -835,8 +859,12 @@ function startGame(container, player1, player2) {
     fireBtn.addEventListener('click', () => {
         fire(selectedSquare1, gameState, player2, 1, 2, player1Cont, opp1Board, switchText, switchScreen, p2Board);
     });
+
+    opponentArea.appendChild(opp1Board);
+    opponentArea.appendChild(fireBtn);
      
-    opp1Board.appendChild(fireBtn);
+    player1Cont.appendChild(opponentArea);
+    // opp1Board.appendChild(fireBtn);
 
     const opp1Squares = opp1Board.querySelectorAll(".square");
     opp1Squares.forEach(square => {
@@ -852,12 +880,20 @@ function startGame(container, player1, player2) {
 
     let selectedSquare2 = null;
 
+    const opponentArea2 = document.createElement('div');
+    opponentArea2.className = "opponent-area";
+
+
     const fireBtn2 = fireBtn.cloneNode(true);
     fireBtn2.addEventListener('click', () => {
         fire(selectedSquare2, gameState, player1, 2, 1, player2Cont, opp2Board, switchText, switchScreen, p1Board);
     });
 
-    opp2Board.appendChild(fireBtn2);
+    opponentArea2.appendChild(opp2Board);
+    opponentArea2.appendChild(fireBtn2);
+
+    player2Cont.appendChild(opponentArea2);
+    // opp2Board.appendChild(fireBtn2);
 
     const opp2Squares = opp2Board.querySelectorAll(".square");
     opp2Squares.forEach(square => {
@@ -875,6 +911,7 @@ function startGame(container, player1, player2) {
 function setTarget(square, image, btn, player) {
     const coord = JSON.parse(square.dataset.myArray);
     const cell = player.playerBoard.board[coord[0]][coord[1]];
+    image.classList.add("target-marker");
 
     if (cell.hit) return;
 
@@ -934,7 +971,7 @@ function fire(selectedSquare, gameState, player, playerNum, oppNumber, playerCon
         }, 1000);
     }
 
-    renderBoard(player.playerBoard, null, playerBoard);
+    renderBoard(player.playerBoard, playerBoard);
 }
 
 export function multiplayer(container) {
@@ -1006,7 +1043,7 @@ export function multiplayer(container) {
                 container.appendChild(title);
                 
                 player1.playerBoard.placeShipDefault();
-                renderBoard(player1.playerBoard.board, null, playerBoardCont);
+                renderBoard(player1.playerBoard.board, playerBoardCont);
                 renderShips(player1.playerBoard, shipCont, playerBoardCont);
                 dragAndDrop(player1.playerBoard, playerBoardCont);
 
@@ -1039,7 +1076,7 @@ export function multiplayer(container) {
                 playerBoardCont.parentNode.replaceChild(player2BoardCont, playerBoardCont);
                 
                 player2.playerBoard.placeShipDefault();
-                renderBoard(player2.playerBoard.board, null, player2BoardCont);
+                renderBoard(player2.playerBoard.board, player2BoardCont);
                 renderShips(player2.playerBoard, shipCont, player2BoardCont);
                 dragAndDrop(player2.playerBoard, player2BoardCont);
 
@@ -1073,6 +1110,7 @@ export function multiplayer(container) {
 
     const close = document.createElement('button');
     close.textContent = "Close";
+    close.className = "close";
     close.addEventListener("click", () => {
         dialog.close();
         dialog.replaceChildren();

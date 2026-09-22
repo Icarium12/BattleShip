@@ -1,20 +1,69 @@
+:root {
+    --ink: #172a3a;
+    --navy: #123b5d;
+    --water: #dcecf2;
+    --paper: #f7f4ed;
+    --coral: #d95d5d;
+    --line: #9bb7c4;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    padding: 32px 20px;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+.game-title {
+    margin: 0 auto 28px;
+    color: var(--navy);
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-size: clamp(2.2rem, 6vw, 4.5rem);
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.game-title::after {
+    display: block;
+    width: 72px;
+    height: 3px;
+    margin: 14px auto 0;
+    background: var(--coral);
+    content: "";
+}
+
+
 .gameboard {
-    position: relative;
     display: grid;
-    grid-template-columns: repeat(10, 1fr);
-    grid-template-rows: repeat(10, 1fr);
-    gap: 0;
-    border: 1px solid black;
-    width: 400px;
-    height: 400px;
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+    grid-template-rows: repeat(10, minmax(0, 1fr));
+    width: min(400px, 90vw);
+    aspect-ratio: 1;
+    background: var(--water);
+    border: 2px solid var(--navy);
 }
 
 .square {
+    min-width: 0;
+    min-height: 0;
     position: relative;
-    box-sizing: border-box;
     display: flex;
     justify-content: center;
     align-items: center;
+    border-color: var(--line) !important;
+    color: var(--coral);
+    font-family: Arial, sans-serif;
+    font-size: 1.2rem;
+    font-weight: bold;
 }
 
 img {
@@ -23,13 +72,136 @@ img {
     object-fit: cover;
 }
 
-.player-cont {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-evenly;
-    border: 1px solid black;
+.target-marker {
+    width: 92%;
+    height: 92%;
+    object-fit: contain;
+    pointer-events: none;
 }
 
+.player-cont {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 28px;
+    justify-content: center;
+    align-items: flex-start;
+    max-width: 1100px;
+    margin: 32px auto;
+    padding: 24px;
+}
+
+button {
+    border: 1px solid var(--navy);
+    border-radius: 4px;
+    padding: 10px 16px;
+    background: var(--navy);
+    color: var(--paper);
+    font: inherit;
+    cursor: pointer;
+}
+
+button:hover:not(:disabled){
+    background: var(--ink);
+}
+
+button:focus-visible {
+    outline: 3px solid var(--ink);
+    outline-offset: 3px;
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+}
+
+.fire {
+    min-width: 140px;
+    background: var(--coral);
+    border-color: var(--coral);
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.fire:hover:not(:disabled) {
+    background: #b94343;
+    border-color: #b94343;
+}
+
+/* .fire:active:not(:disabled) {
+
+} */
+
+.opponent-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+}
+
+dialog {
+    width: min(420px, calc(100vw - 32px));
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--paper);
+    color: var(--ink);
+    box-shadow: 0 18px 50px rgba(23, 42, 58, 0.25);
+}
+
+dialog::backdrop{
+    background: rgba(23, 42, 58, 0.55);
+}
+
+.playerForm {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 28px;
+}
+
+.playerForm label {
+    color: var(--navy);
+    font-weight: bold;
+}
+
+.playerForm input{
+    width: 100%;
+    padding: 11px 12px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: white;
+    color: var(--ink);
+    font: inherit;
+}
+
+.playerForm input:focus {
+    border-color: var(--navy);
+    outline: 3px solid rgba(18, 59, 93, 0.2);
+}
+
+.playerForm button {
+    margin-top: 6px;
+}
+
+.playerForm button[type="button"]:last-child {
+    background: transparent;
+    color: var(--navy);
+}
+
+.close {
+    background: transparent;
+    border-color: var(--line);
+    color: var(--ink);
+    padding: 8px 14px;
+    font-size: 0.9rem;
+}
+
+.close:hover:not(:disabled) {
+    background: var(--water);
+    border-color: var(--navy);
+    color: var(--navy);
+}
 
 .popup-overlay {
     position: absolute;
@@ -42,6 +214,7 @@ img {
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-direction: column;
 
     /* background-color: rgba(0, 0, 0, 0.85); */
     color: #4CAF50;
@@ -58,7 +231,11 @@ img {
 .ships {
     display: flex;
     flex-direction: column;
-    border: 1px solid black;
+    gap: 12px;
+    min-width: 180px;
+    padding: 16px;
+    border: 1px solid var(--line);
+    background: rgba(220, 236, 242, 0.45);
 }
 
 .ship-pl {
@@ -69,13 +246,8 @@ img {
 }
 
 .ship {
-    /* display: flex; */
-    border: 1px solid blue;
-    box-sizing: border-box;
-    /* gap: 5px; */
-    /* height: 10px;
-    width: 10px;
-    padding: 15px; */
+    background: var(--navy);
+    border-color: var(--navy) !important;
 }
 
 .ship-holder {

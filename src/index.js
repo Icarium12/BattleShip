@@ -6,6 +6,7 @@ import "./styles.css";
 const body = document.body;
 
 const title = document.createElement('div');
+title.className = "game-title";
 title.textContent = "BattleShip Game"; 
 body.append(title);
 
