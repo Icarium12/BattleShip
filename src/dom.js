@@ -80,8 +80,8 @@ function renderShips(gameboard, cont, boardCont) {
     random.addEventListener('click', () => {
         gameboard.placeShipRandom();
         renderBoard(gameboard, boardCont);
-        playerCont.prepend(random);
-        cont.remove();
+        // playerCont.prepend(random);
+        // cont.remove();
     })
     cont.appendChild(random);
     // gameboard.ships.forEach(ship => {
@@ -361,7 +361,7 @@ function dragAndDrop(gameboard, boardCont) {
                     oldCoords[0][0],
                     oldCoords[0][1],
                     oldDirection
-                )
+                );
 
             const placementClass = validPlacement
                 ? "ship-placement-valid"
@@ -442,7 +442,7 @@ function dragAndDrop(gameboard, boardCont) {
                             "ship-placement-invalid"
                         );
                         piece.classList.add(placementClass);
-                    });  
+                    });
 
                     // if (!validPlacement) {
                     //     relatedPieces.forEach(p => {
@@ -640,8 +640,20 @@ function computerMove (gameboard,
 
     let win = gameboard.checkShipSunk();
     if (win != null) {
+        winPopup.replaceChildren();
         winPopup.style.color = "red";
         winPopup.textContent = "You lose";
+
+        const playAgn = document.createElement('div');
+        playAgn.textContent = "Play again";
+        winPopup.appendChild(playAgn);
+
+        const sinOrMul = document.createElement('div');
+
+        sinOrMul.appendChild(button1);
+        sinOrMul.appendChild(button2);
+        winPopup.appendChild(sinOrMul);
+
         winPopup.classList.add('show');
         playerCont.appendChild(winPopup);
         playerCont.style.pointerEvents = 'none';
@@ -677,35 +689,19 @@ export function createPlayer(container) {
     })
     form.appendChild(input);
 
-    // const typeLabel = document.createElement('label');
-    // typeLabel.textContent = "Player Type:";
-    // form.appendChild(typeLabel);
-
-    // const playerType = document.createElement('select');
-    // playerType.name = "type";
-    // const option1 = document.createElement('option');
-    // option1.value = "user";
-    // option1.textContent = "user";
-    // playerType.appendChild(option1);
-
-    // const option2 = document.createElement('option');
-    // option2.value = "computer";
-    // option2.textContent = "computer";
-    // playerType.appendChild(option2);
-
-    // form.appendChild(playerType);
-
     const button = document.createElement('button');
     button.textContent = "Start";
     button.type = "button";
     button.addEventListener('click', () => {
         if (form.checkValidity()) {
+            container.replaceChildren();
             button1.remove();
             button2.remove();
 
             dialog.close();
 
-
+            container.appendChild(shipCont);
+            container.appendChild(playerBoardCont);
             const player = new Player("user", input.value);
             player.playerBoard.createBoard();
             player.playerBoard.placeShipDefault();
@@ -735,7 +731,9 @@ export function createPlayer(container) {
 
                 const computer = new Player('computer', 'computer');
                 computer.playerBoard.createBoard();
-                computer.playerBoard.placeShipRandom();
+                computer.playerBoard.placeShipDefault();
+                oppBoardCont.replaceChildren();
+                container.appendChild(oppBoardCont);
                 renderOppBoard(computer.playerBoard, oppBoardCont);
 
                 const image = document.createElement("img");
@@ -821,6 +819,8 @@ export function createPlayer(container) {
                             computerMove(player.playerBoard, oppBoardCont, playerBoardCont, gameState);
                         }, 1000);
                     }
+                    let win = computer.playerBoard.checkShipSunk();
+                    checkWin(win, player);
                 });
 
                 // oppBoardCont.appendChild(fireBtn);
@@ -835,10 +835,10 @@ export function createPlayer(container) {
                     
                 });
 
-                oppBoardCont.addEventListener('click', () => {
-                    let win = computer.playerBoard.checkShipSunk();
-                    checkWin(win, player);
-                })
+                // oppBoardCont.addEventListener('click', () => {
+                //     let win = computer.playerBoard.checkShipSunk();
+                //     checkWin(win, player);
+                // });
             })
             container.appendChild(start);   
         }
@@ -864,6 +864,17 @@ export function createPlayer(container) {
     dialog.showModal();
 }
 
+export function resetGame(container) {
+    winPopup.classList.remove("show");
+    winPopup.replaceChildren();
+
+    playerCont.style.pointerEvents = "auto";
+    playerBoardCont.style.pointerEvents = "auto";
+    oppBoardCont.style.pointerEvents = "auto";
+
+    container.replaceChildren();
+}
+
 function checkWin(win, player) {
     if (win !== null) {
         winPopup.textContent = `${player.name} wins`;
@@ -873,13 +884,6 @@ function checkWin(win, player) {
         winPopup.appendChild(playAgn);
 
         const sinOrMul = document.createElement('div');
-        // button1.addEventListener('click', () => {
-        //     createPlayer(playerCont);
-        // });
-
-        // button2.addEventListener('click', () => {
-        //     multiplayer(playerCont);
-        // });
 
         sinOrMul.appendChild(button1);
         sinOrMul.appendChild(button2);
@@ -902,11 +906,11 @@ function startGame(container, player1, player2) {
 
     const player1Cont = document.createElement('div');
     player1Cont.classList.add("player-cont");
-    player1Cont.classList.add("player-panel");
+    // player1Cont.classList.add("player-panel");
 
     const player2Cont = document.createElement('div');
     player2Cont.classList.add("player-cont");
-    player2Cont.classList.add("player-panel");
+    // player2Cont.classList.add("player-panel");
     player2Cont.classList.add("hide");
 
     container.appendChild(player1Cont);
@@ -959,8 +963,19 @@ function startGame(container, player1, player2) {
     const image = document.createElement("img");
     image.src = targetImg;
 
+    const playerArea = document.createElement("div");
+    playerArea.className = "player-area";
+
+    const myTitle = document.createElement("div");
+    myTitle.className =  "player-board-name";
+    myTitle.textContent = `${player1.name} board`;
+
     const opponentArea = document.createElement("div");
     opponentArea.className = "opponent-area";
+
+    const oppTitle = document.createElement("div");
+    oppTitle.className = "opp-name";
+    oppTitle.textContent = `${player2.name} board`;
 
     const fireBtn = document.createElement('button');
     fireBtn.classList.add("fire");
@@ -971,11 +986,19 @@ function startGame(container, player1, player2) {
 
     fireBtn.addEventListener('click', () => {
         fire(selectedSquare1, gameState, player2, 1, 2, player1Cont, opp1Board, switchText, switchScreen, p2Board);
+
+        let win = player2.playerBoard.checkShipSunk();
+        checkWin(win, player1);
     });
 
+    playerArea.appendChild(myTitle);
+    playerArea.appendChild(p1Board);
+
+    opponentArea.appendChild(oppTitle);
     opponentArea.appendChild(opp1Board);
     opponentArea.appendChild(fireBtn);
      
+    player1Cont.appendChild(playerArea);
     player1Cont.appendChild(opponentArea);
     // opp1Board.appendChild(fireBtn);
 
@@ -986,25 +1009,44 @@ function startGame(container, player1, player2) {
         });
     });
 
-    opp1Board.addEventListener('click', () => {
-        let win = player2.playerBoard.checkShipSunk();
-        checkWin(win, player1);
-    });
+    // opp1Board.addEventListener('click', () => {
+    //     let win = player2.playerBoard.checkShipSunk();
+    //     checkWin(win, player1);
+    // });
 
     let selectedSquare2 = null;
 
+    const player2Area = document.createElement('div');
+    player2Area.className = "player-area";
+
+    const myTitle2 = document.createElement('div');
+    myTitle2.className =  "player-board-name";
+    myTitle2.textContent = `${player2.name} board`;
+
     const opponentArea2 = document.createElement('div');
     opponentArea2.className = "opponent-area";
+    
+    const oppTitle2 = document.createElement('div');
+    oppTitle2.className = "opp-name";
+    oppTitle2.textContent = `${player1.name} board`;
 
 
     const fireBtn2 = fireBtn.cloneNode(true);
     fireBtn2.addEventListener('click', () => {
         fire(selectedSquare2, gameState, player1, 2, 1, player2Cont, opp2Board, switchText, switchScreen, p1Board);
+
+        let win = player1.playerBoard.checkShipSunk();
+        checkWin(win, player2);
     });
 
+    player2Area.appendChild(myTitle2);
+    player2Area.appendChild(p2Board);
+
+    opponentArea2.appendChild(oppTitle2);
     opponentArea2.appendChild(opp2Board);
     opponentArea2.appendChild(fireBtn2);
 
+    player2Cont.appendChild(player2Area);
     player2Cont.appendChild(opponentArea2);
     // opp2Board.appendChild(fireBtn2);
 
@@ -1015,10 +1057,10 @@ function startGame(container, player1, player2) {
         });
     });
 
-    opp2Board.addEventListener('click', () => {
-        let win = player1.playerBoard.checkShipSunk();
-        checkWin(win, player2);
-    })
+    // opp2Board.addEventListener('click', () => {
+    //     let win = player1.playerBoard.checkShipSunk();
+    //     checkWin(win, player2);
+    // });
 }
 
 function setTarget(square, image, btn, player) {
@@ -1141,6 +1183,7 @@ export function multiplayer(container) {
         e.preventDefault();
         if (form.checkValidity()) {
             async function playerSetup() {
+                shipCont.replaceChildren();
                 container.replaceChildren();
                 button1.remove();
                 button2.remove();

@@ -1,6 +1,4 @@
-import { renderBoard, createPlayer, multiplayer } from "./dom";
-import { Gameboard } from "./gameboard";
-import { Player } from "./player";
+import { renderBoard, createPlayer, multiplayer, resetGame } from "./dom";
 import "./styles.css";
 
 const body = document.body;
@@ -13,6 +11,7 @@ body.append(title);
 export const button1 = document.createElement('button');
 button1.textContent = "Single Player";
 button1.addEventListener('click', () => {
+    resetGame(playerCont);
     const player = createPlayer(playerCont);
 });
 body.appendChild(button1);
@@ -20,6 +19,7 @@ body.appendChild(button1);
 export const button2 = document.createElement('button');
 button2.textContent = "Multiplayer";
 button2.addEventListener('click', () => {
+    resetGame(playerCont);
     multiplayer(playerCont);
 });
 body.appendChild(button2);
