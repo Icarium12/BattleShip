@@ -207,7 +207,10 @@ function dragAndDrop(gameboard, boardCont) {
     let lastMouseY = 0;
     let anchorOffsetX = 0;
     let anchorOffsetY = 0;
-    let validPlacement;
+    let validPlacement = false;
+    let draggedShip = null;
+    let oldCoords = null;
+    let oldDirection = null;
     let dragPieces = [];
     
     boardCont.addEventListener('pointerdown', (e) => {
@@ -266,13 +269,43 @@ function dragAndDrop(gameboard, boardCont) {
 
         lastMouseX = e.clientX;
         lastMouseY = e.clientY;
+
+        const coords = JSON.parse(activePiece.dataset.myArray);
+        draggedShip = gameboard.board[coords[0]][coords[1]].value;
+
+        oldCoords =  draggedShip.coords.map(coord => [...coord]);
+        oldDirection = draggedShip.coords.length > 1 &&
+        draggedShip.coords[0][0] !== draggedShip.coords[1][0]
+        ? "vertical"
+        : "horizontal";
+
+        validPlacement = true;
     })
 
     boardCont.addEventListener('pointermove', (e) => {
         if (!activePiece) return;
 
+        const boardRect = boardCont.getBoundingClientRect();
+        const previewRect = dragPieces[0].getBoundingClientRect();
+
         const deltaX = e.clientX - lastMouseX;
         const deltaY = e.clientY - lastMouseY;
+
+        const nextLeft = Math.max(
+            0,
+            Math.min(
+                parseFloat(dragPieces[0].style.left) + deltaX,
+                boardRect.width - previewRect.width
+            )
+        );
+
+        const nextTop = Math.max(
+            0,
+            Math.min(
+                parseFloat(dragPieces[0].style.top) + deltaY,
+                boardRect.height - previewRect.height
+            )
+        );
 
         const anchorX = e.clientX + anchorOffsetX;
         const anchorY = e.clientY + anchorOffsetY;
@@ -280,12 +313,18 @@ function dragAndDrop(gameboard, boardCont) {
         const shipId = activePiece.dataset.shipId;
         const relatedPieces = boardCont.querySelectorAll(`[data-ship-id="${shipId}"]`);
 
-        dragPieces.forEach(piece => {
-            const currentLeft = parseFloat(piece.style.left) || 0;
-            const currentTop = parseFloat(piece.style.top) || 0;
+        const currentLeft = parseFloat(dragPieces[0].style.left) || 0;
+        const currentTop = parseFloat(dragPieces[0].style.top) || 0;
 
-            piece.style.left = `${currentLeft + deltaX}px`;
-            piece.style.top = `${currentTop + deltaY}px`;
+        const movementX = nextLeft - currentLeft;
+        const movementY = nextTop - currentTop;
+
+        dragPieces.forEach(piece => {
+            const pieceLeft = parseFloat(piece.style.left) || 0;
+            const piecetTop = parseFloat(piece.style.top) || 0;
+
+            piece.style.left = `${pieceLeft + movementX}px`;
+            piece.style.top = `${piecetTop + movementY}px`;
         });
 
         lastMouseX = e.clientX;
@@ -299,38 +338,67 @@ function dragAndDrop(gameboard, boardCont) {
             const target = document.elementFromPoint(anchorX, anchorY);
             const square = target?.closest(".square");
 
-            if (!square?.dataset.myArray) return;
+            if (!square?.dataset.myArray){
+                validPlacement = false;
+                return;
+            } 
             const newCoords = JSON.parse(square.dataset.myArray);
             let newX = newCoords[0];
             let newY = newCoords[1];
-            let ship = gameboard.board[x][y].value;
+            // let ship = gameboard.board[x][y].value;
 
-            const oldCoords = ship.coords.map(coord => [...coord]);
-            const oldDirection = ship.coords.length > 1 &&
-                ship.coords[0][0] !== ship.coords[1][0]
-                ? "vertical"
-                : "horizontal";
+            // const oldCoords = ship.coords.map(coord => [...coord]);
+            // const oldDirection = ship.coords.length > 1 &&
+            //     ship.coords[0][0] !== ship.coords[1][0]
+            //     ? "vertical"
+            //     : "horizontal";
             
-            gameboard.removeShip(ship);
-            validPlacement = gameboard.checkPlacement(ship, newX, newY, oldDirection);
+            gameboard.removeShip(draggedShip);
+            validPlacement = gameboard.checkPlacement(draggedShip, newX, newY, oldDirection);
 
             gameboard.placeShip(
-                    ship,
+                    draggedShip,
                     oldCoords[0][0],
                     oldCoords[0][1],
                     oldDirection
                 )
 
-            if (!validPlacement) {
-                relatedPieces.forEach(piece => {
-                    piece.style.border = "2px solid red";
-                })
-            }
-            else {
-                relatedPieces.forEach(piece => {
-                    piece.style.border = "2px solid blue";
-                })
-            }
+            const placementClass = validPlacement
+                ? "ship-placement-valid"
+                : "ship-placement-invalid";
+            relatedPieces.forEach((piece) => {
+                piece.classList.remove(
+                    "ship-placement-valid",
+                    "ship-placement-invalid"
+                );
+                piece.classList.add(placementClass);
+            });  
+
+            // if (!validPlacement) {
+            //     const placementClass = validPlacement
+            //         ? "ship-placement-valid"
+            //         : "ship-placement-invalid";
+            //     relatedPieces.forEach((piece) => {
+            //         piece.classList.remove(
+            //             "ship-placement-valid",
+            //             "ship-placement-invalid"
+            //         );
+            //         piece.classList.add(placementClass);
+            //     });    
+            // }
+            
+            // else {
+            //     const placementClass = validPlacement
+            //         ? "ship-placement-valid"
+            //         : "ship-placement-invalid";
+            //     relatedPieces.forEach((piece) => {
+            //         piece.classList.remove(
+            //             "ship-placement-valid",
+            //             "ship-placement-invalid"
+            //         );
+            //         piece.classList.add(placementClass);
+            //     })
+            // }
         }
         else {
             for (const piece of relatedPieces) {
@@ -346,34 +414,46 @@ function dragAndDrop(gameboard, boardCont) {
                     const newCoords = JSON.parse(square.dataset.myArray);
                     let newX = newCoords[0];
                     let newY = newCoords[1];
-                    let ship = gameboard.board[x][y].value;
+                    // let ship = gameboard.board[x][y].value;
 
-                    const oldCoords = ship.coords.map(coord => [...coord]);
-                    const oldDirection = ship.coords.length > 1 &&
-                        ship.coords[0][0] !== ship.coords[1][0]
-                        ? "vertical"
-                        : "horizontal";
+                    // const oldCoords = ship.coords.map(coord => [...coord]);
+                    // const oldDirection = ship.coords.length > 1 &&
+                    //     ship.coords[0][0] !== ship.coords[1][0]
+                    //     ? "vertical"
+                    //     : "horizontal";
                     
-                    gameboard.removeShip(ship);
-                    validPlacement = gameboard.checkPlacement(ship, newX, newY, oldDirection);
+                    gameboard.removeShip(draggedShip);
+                    validPlacement = gameboard.checkPlacement(draggedShip, newX, newY, oldDirection);
 
                     
                    gameboard.placeShip(
-                        ship,
+                        draggedShip,
                         oldCoords[0][0],
                         oldCoords[0][1],
                         oldDirection
-                    )
-                    if (!validPlacement) {
-                        relatedPieces.forEach(p => {
-                            p.style.border = "2px solid red";
-                        });
-                    }
-                    else {
-                        relatedPieces.forEach(p => {
-                            p.style.border = "2px solid blue";
-                        });
-                    }
+                    );
+
+                    const placementClass = validPlacement
+                        ? "ship-placement-valid"
+                        : "ship-placement-invalid";
+                    relatedPieces.forEach((piece) => {
+                        piece.classList.remove(
+                            "ship-placement-valid",
+                            "ship-placement-invalid"
+                        );
+                        piece.classList.add(placementClass);
+                    });  
+
+                    // if (!validPlacement) {
+                    //     relatedPieces.forEach(p => {
+                    //         p.style.border = "2px solid red";
+                    //     });
+                    // }
+                    // else {
+                    //     relatedPieces.forEach(p => {
+                    //         p.style.border = "2px solid blue";
+                    //     });
+                    // }
 
                     break;
 
@@ -381,6 +461,7 @@ function dragAndDrop(gameboard, boardCont) {
             }
         }
     });
+
 
     boardCont.addEventListener('pointerup', (e) => {
         if (!activePiece) return;
@@ -390,28 +471,30 @@ function dragAndDrop(gameboard, boardCont) {
 
         const anchorX = e.clientX + anchorOffsetX;
         const anchorY = e.clientY + anchorOffsetY;
+
+        const target = document.elementFromPoint(anchorX, anchorY);
+        const square = target?.closest(".square");
         
-        if (validPlacement) {
+        if (validPlacement && square?.dataset.myArray) {
             const origin = JSON.parse(activePiece.dataset.myArray);
             const ship = gameboard.board[origin[0]][origin[1]].value
 
-            const target = document.elementFromPoint(anchorX, anchorY);
-            const square = target?.closest(".square");
-
-            if (!square?.dataset.myArray) return;
-            const newCoords = JSON.parse(square.dataset.myArray);
-            let newX = newCoords[0];
-            let newY = newCoords[1];
-
-            const oldDirection = ship.coords.length > 1 &&
-                        ship.coords[0][0] !== ship.coords[1][0]
-                        ? "vertical"
-                        : "horizontal";
             
-            gameboard.removeShip(ship);
+
+            // if (!square?.dataset.myArray) return;
+            const newCoords = JSON.parse(square.dataset.myArray);
+            const newX = newCoords[0];
+            const newY = newCoords[1];
+
+            // const oldDirection = ship.coords.length > 1 &&
+            //             ship.coords[0][0] !== ship.coords[1][0]
+            //             ? "vertical"
+            //             : "horizontal";
+            
+            gameboard.removeShip(draggedShip);
 
             gameboard.placeShip(
-                ship,
+                draggedShip,
                 newX,
                 newY,
                 oldDirection
@@ -421,10 +504,17 @@ function dragAndDrop(gameboard, boardCont) {
             activePiece = null;
             
         }
-        else {
-            renderBoard(gameboard, boardCont);
-            activePiece = null;
-        }
+        dragPieces.forEach(piece => piece.remove());
+        dragPieces = [];
+        renderBoard(gameboard, boardCont);
+
+        activePiece = null;
+        draggedShip = null;
+        validPlacement = false;
+        // else {
+        //     renderBoard(gameboard, boardCont);
+        //     activePiece = null;
+        // }
     })
 }
 
@@ -651,8 +741,24 @@ export function createPlayer(container) {
                 const image = document.createElement("img");
                 image.src = targetImg;
 
+                const playerArea = document.createElement("div");
+                playerArea.className = "player-area";
+
+                const boardName = document.createElement('div');
+                boardName.className = "player-board-name";
+                boardName.textContent = `${player.name} Board`;
+
+                playerArea.appendChild(boardName);
+
+                playerArea.appendChild(playerBoardCont);
+
                 const opponentArea = document.createElement("div");
                 opponentArea.className = "opponent-area";
+
+                const oppName = document.createElement("div");
+                oppName.className = "opp-name";
+                oppName.textContent = "Computer Board";
+                opponentArea.appendChild(oppName);
 
                 opponentArea.appendChild(oppBoardCont);
 
@@ -663,6 +769,8 @@ export function createPlayer(container) {
                 fireBtn.textContent = "fire";
                 fireBtn.disabled = true;
 
+
+                playerCont.appendChild(playerArea);
                 playerCont.appendChild(opponentArea);
 
                 let selectedSquare = null;
@@ -794,9 +902,11 @@ function startGame(container, player1, player2) {
 
     const player1Cont = document.createElement('div');
     player1Cont.classList.add("player-cont");
+    player1Cont.classList.add("player-panel");
 
     const player2Cont = document.createElement('div');
     player2Cont.classList.add("player-cont");
+    player2Cont.classList.add("player-panel");
     player2Cont.classList.add("hide");
 
     container.appendChild(player1Cont);
@@ -823,8 +933,11 @@ function startGame(container, player1, player2) {
     renderOppBoard(player1.playerBoard, opp2Board);
 
     const switchScreen = document.createElement('div');
+    switchScreen.classList.add("switch");
     switchScreen.classList.add("hide");
+
     const switchText = document.createElement('div');
+    switchText.classList.add("switch-title");
     switchScreen.appendChild(switchText);
     const switchButton = document.createElement("button");
     switchButton.textContent = "Ready";
@@ -1028,6 +1141,7 @@ export function multiplayer(container) {
         e.preventDefault();
         if (form.checkValidity()) {
             async function playerSetup() {
+                container.replaceChildren();
                 button1.remove();
                 button2.remove();
 
@@ -1039,24 +1153,40 @@ export function multiplayer(container) {
                 player2.playerBoard.createBoard();
 
                 const title = document.createElement('div');
-                title.textContent = `${player1.name} place and comfirm your ships`;
-                container.appendChild(title);
-                
+                title.className = "switch-title";
+                title.textContent = `${player1.name} press ready to place your shuips`;
+
+                const switchScreen = document.createElement("div");
+                switchScreen.className = "switch";
+
+                const confirm = document.createElement('button');
+                confirm.textContent = "Ready";
+
+                switchScreen.appendChild(title);
+                switchScreen.appendChild(confirm);
+
+                container.appendChild(switchScreen);
+
+                await waitForClick(confirm);
+
+                container.replaceChildren();
+
                 player1.playerBoard.placeShipDefault();
                 renderBoard(player1.playerBoard.board, playerBoardCont);
                 renderShips(player1.playerBoard, shipCont, playerBoardCont);
                 dragAndDrop(player1.playerBoard, playerBoardCont);
+                container.appendChild(shipCont);
+                container.appendChild(playerBoardCont);
 
-                const confirm = document.createElement('button');
-                confirm.textContent = "Confirm placement";
+                confirm.textContent = "Ready";
                 container.appendChild(confirm);
 
                 await waitForClick(confirm);
 
                 container.replaceChildren();
-                const switchScreen = document.createElement("div");
+                
 
-                title.textContent = `${player2.name} press ready to set up your ships`;
+                title.textContent = `${player2.name} press ready to place your ships`;
                 switchScreen.appendChild(title);
 
                 confirm.textContent = "Ready";

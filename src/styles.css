@@ -43,6 +43,8 @@ body {
 
 
 .gameboard {
+    position: relative;
+    overflow: hidden;
     display: grid;
     grid-template-columns: repeat(10, minmax(0, 1fr));
     grid-template-rows: repeat(10, minmax(0, 1fr));
@@ -132,6 +134,25 @@ button:disabled {
 
 } */
 
+.player-area, 
+.opponent-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin: 0 auto;
+}
+
+.player-board-name,
+.opp-name {
+    color: var(--navy);
+    font-size: 0.82rem;
+    letter-spacing: 0.12rem;
+    text-transform: uppercase;
+    line-height: 1.2;
+    text-align: center;
+}
+
 .opponent-area {
     display: flex;
     flex-direction: column;
@@ -203,6 +224,58 @@ dialog::backdrop{
     color: var(--navy);
 }
 
+.switch {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    width: min(520px, 90vw);
+    margin: 32px auto;
+    padding: 28px 22px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.7);
+    box-shadow: 0 18px 35px rgba(18, 59, 93, 0.08);
+}
+
+.switch-title {
+    margin: 0;
+    color: var(--navy);
+    font-size: clamp(1.2rem, 2vw, 1.8rem);
+}
+
+.player-panel {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 18px;
+    width: min(100%,  880px);
+    margin: 20px auto;
+    padding: 18px 14px 22px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: rgba(220, 236, 242, 0.35);
+    box-shadow: 0 10px 20px rgba(18, 59, 93, 0.06);
+}
+
+.player-panel .gameboard {
+    width: min(360px, 42vw);
+}
+
+.player-panel .opponent-area {
+    padding: 14px 14px 10px;
+    border: 1px solid rgba(155, 183, 196, 0.8);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.45);
+}
+
+.switch button,
+.player-panel button {
+    min-width: 160px;
+}
+
 .popup-overlay {
     position: absolute;
     /* top: 50%;
@@ -248,6 +321,24 @@ dialog::backdrop{
 .ship {
     background: var(--navy);
     border-color: var(--navy) !important;
+}
+
+.ship-placement-valid {
+    background: #2f8f5b;
+    border-color: #1f6840 !important;
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.25);
+}
+
+.ship-placement-invalid {
+    background: #b94343;
+    border-color: #812f2f !important;
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.25);
+}
+
+.drag-preview {
+    position: absolute;
+    z-index: 10;
+    pointer-events: none;
 }
 
 .ship-holder {
