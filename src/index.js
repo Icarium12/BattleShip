@@ -1,4 +1,5 @@
-import { renderBoard, createPlayer, multiplayer, resetGame } from "./dom";
+import { singlePlayer, multiplayer } from "./dom";
+import { resetGame } from "./screens/singlePlayer";
 import "./styles.css";
 
 const body = document.body;
@@ -16,7 +17,7 @@ export const button1 = document.createElement('button');
 button1.textContent = "Single Player";
 button1.addEventListener('click', () => {
     resetGame(playerCont);
-    const player = createPlayer(playerCont);
+    const player = singlePlayer(playerCont);
 });
 buttonCont.appendChild(button1);
 
@@ -46,24 +47,3 @@ playerCont.appendChild(playerBoardCont);
 playerCont.appendChild(oppBoardCont);
 
 body.appendChild(playerCont);
-
-
-
-
-
-
-// const board = new Gameboard();
-// board.createBoard();
-// console.log(board.board[0][0]);
-// // board.placeShipDefault();
-// // renderBoard(board.board);
-
-// const player1 = new Player("user", "p1");
-// player1.playerBoard.createBoard();
-// console.log(player1.playerBoard.board[0][0]);
-// renderBoard(player1.playerBoard);
-
-function runGame () {
-
-    
-}

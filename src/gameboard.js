@@ -12,12 +12,6 @@ class Node {
         this.allSpaces = [];
         this.anchorTo = null;
         this.hit = false;
-        // this.isBoundary = false;
-        // this.neighbors = [];
-        // this.up = null;
-        // this.down = null;
-        // this.left = null;
-        // this.right = null;
 
     }
 }
