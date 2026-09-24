@@ -52,7 +52,7 @@ body {
     aspect-ratio: 1;
     background: var(--water);
     border: 2px solid var(--navy);
-}
+} 
 
 .square {
     min-width: 0;
@@ -66,6 +66,26 @@ body {
     font-family: Arial, sans-serif;
     font-size: 1.2rem;
     font-weight: bold;
+}
+
+.square.miss {
+    color: var(--navy);
+    font-size: 1.8rem;
+    font-weight: bold;
+    text-shadow: 0 1px 2px rgba(23, 42, 58, 0.35);
+    background: rgba(255, 255, 255, 0.7);
+}
+
+.square.hit {
+    background: var(--coral);
+    color: var(--paper);
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-shadow: 0 1px 2px rgba(23, 42, 58, 0.45);
+}
+
+.player-area .square.hit {
+    background: var(--navy);
 }
 
 img {
@@ -287,9 +307,16 @@ dialog::backdrop{
     min-width: 140px;
 }
 
-.popup-overlay > div:first-of-type {
+.popup-overlay > div:first-of-type:not(.play) {
     font-size: 1rem;
     font-weight: normal;
+}
+
+.popup-overlay .play {
+    font-size: 2rem;
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
 .ships {
@@ -350,4 +377,12 @@ dialog::backdrop{
 
 .hide {
     display: none;
+}
+
+.button-cont {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin: 0 auto;
 }

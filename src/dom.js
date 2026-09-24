@@ -2,6 +2,8 @@ import { Player } from "./player";
 import { playerCont, playerBoardCont, oppBoardCont, winPopup, shipCont, button1, button2 } from ".";
 import targetImg from "./target.jpg";
 
+let computerMoveTimer;
+
 export function renderBoard(gameboard, boardCont) {
     boardCont.replaceChildren();
     boardCont.className = "gameboard";
@@ -24,12 +26,14 @@ export function renderBoard(gameboard, boardCont) {
                 square.classList.add("square",'ship');
                 if (boardArray[i][j].hit) {
                     square.textContent = "X";
+                    square.classList.add("hit");
                 }
             }
             else {
                 square.style.border = "1px solid black";
                 if (boardArray[i][j].hit) {
-                    square.textContent = ".";
+                    square.textContent = "•";
+                    square.classList.add("miss");
                 }
             }
 
@@ -61,11 +65,13 @@ export function renderOppBoard(gameboard, boardCont) {
             if (boardArray[i][j].hasShip) {
                 if (boardArray[i][j].hit) {
                     square.textContent = "X";
+                    square.classList.add("hit");
                 }
             }
             else {
                 if (boardArray[i][j].hit) {
-                    square.textContent = ".";
+                    square.textContent = "•";
+                    square.classList.add("miss");
                 }
             }
         }
@@ -583,9 +589,15 @@ function chooseTarget(gameboard, gameState) {
 function computerMove (gameboard, 
                         boardCont, 
                         oppBoardCont, 
-                        gameState) {
+                        gameState,
+                        player) {
     
     if(gameState.activePlayer !== 2 || gameState.boardOwner !== 1) return;
+
+    oppBoardCont.style.boxShadow = "none";
+    boardCont.style.boxShadow = "none";
+    const activeShadow =
+        "0 0 0 4px rgba(217, 93, 93, 0.85), 0 8px 18px rgba(18, 59, 93, 0.18)";
     
     const target = chooseTarget(gameboard, gameState);
 
@@ -603,6 +615,7 @@ function computerMove (gameboard,
 
     if (cell.hasShip) {
         square.textContent ="X";
+        square.classList.add("hit");
 
         if (cell.value.sunk) {
             gameState.compTargets = [];
@@ -614,7 +627,8 @@ function computerMove (gameboard,
                 })
 
                 if (boundarySquare) {
-                    boundarySquare.textContent = ".";
+                    boundarySquare.textContent = "•";
+                    boundarySquare.classList.add("miss");
                 }
             });
 
@@ -624,41 +638,51 @@ function computerMove (gameboard,
         }
 
         setTimeout(() => {
-            computerMove(gameboard, boardCont, oppBoardCont, gameState);
+            computerMove(gameboard, boardCont, oppBoardCont, gameState, player);
         }, 1000);
 
         return;
     }
 
-    square.textContent = "."
+    square.textContent = "•"
+    square.classList.add("miss");
 
-    oppBoardCont.style.backgroundColor = "#f5f5f5";
-    boardCont.style.backgroundColor = "#ffffff";
+    boardCont.style.boxShadow = activeShadow;
+    oppBoardCont.style.boxShadow = "none";
+
+    // oppBoardCont.style.backgroundColor = "#f5f5f5";
+    // boardCont.style.backgroundColor = "#ffffff";
     
     gameState.activePlayer = 1;
     gameState.boardOwner = 2;
 
     let win = gameboard.checkShipSunk();
-    if (win != null) {
-        winPopup.replaceChildren();
-        winPopup.style.color = "red";
-        winPopup.textContent = "You lose";
+    checkWin(win, player);
+    // if (win != null) {
+    //     winPopup.replaceChildren();
+    //     winPopup.textContent = "You lose";
 
-        const playAgn = document.createElement('div');
-        playAgn.textContent = "Play again";
-        winPopup.appendChild(playAgn);
+    //     const playAgn = document.createElement('div');
+    //     playAgn.textContent = "Play again";
+    //     winPopup.appendChild(playAgn);
 
-        const sinOrMul = document.createElement('div');
+    //     const sinOrMul = document.createElement('div');
 
-        sinOrMul.appendChild(button1);
-        sinOrMul.appendChild(button2);
-        winPopup.appendChild(sinOrMul);
+    //     sinOrMul.appendChild(button1);
+    //     sinOrMul.appendChild(button2);
+    //     winPopup.appendChild(sinOrMul);
 
-        winPopup.classList.add('show');
-        playerCont.appendChild(winPopup);
-        playerCont.style.pointerEvents = 'none';
-    }
+    //     winPopup.classList.add('show');
+    //     playerCont.appendChild(winPopup);
+    //     playerCont.style.pointerEvents = 'none';
+    // }
      
+}
+
+function createBoardContainer() {
+    const board = document.createElement("div");
+    board.className = "gameboard";
+    return board;
 }
 
 export function createPlayer(container) {
@@ -700,15 +724,17 @@ export function createPlayer(container) {
 
             dialog.close();
 
+            const newPlayerBoard = createBoardContainer(); 
+
             container.appendChild(shipCont);
-            container.appendChild(playerBoardCont);
+            container.appendChild(newPlayerBoard);
             const player = new Player("user", input.value);
             player.playerBoard.createBoard();
             player.playerBoard.placeShipDefault();
-            renderShips(player.playerBoard, shipCont, playerBoardCont);
-            renderBoard(player.playerBoard, playerBoardCont);
+            renderShips(player.playerBoard, shipCont, newPlayerBoard);
+            renderBoard(player.playerBoard, newPlayerBoard);
 
-            dragAndDrop(player.playerBoard, playerBoardCont);
+            dragAndDrop(player.playerBoard, newPlayerBoard);
 
             const start = document.createElement('button');
             start.textContent = "Start Game";
@@ -721,7 +747,7 @@ export function createPlayer(container) {
                     button.remove();
                 });
 
-                playerBoardCont.style.pointerEvents = 'none';
+                newPlayerBoard.style.pointerEvents = 'none';
 
                 const gameState = {
                     activePlayer: 1,
@@ -731,7 +757,7 @@ export function createPlayer(container) {
 
                 const computer = new Player('computer', 'computer');
                 computer.playerBoard.createBoard();
-                computer.playerBoard.placeShipDefault();
+                computer.playerBoard.placeShipRandom();
                 oppBoardCont.replaceChildren();
                 container.appendChild(oppBoardCont);
                 renderOppBoard(computer.playerBoard, oppBoardCont);
@@ -748,7 +774,7 @@ export function createPlayer(container) {
 
                 playerArea.appendChild(boardName);
 
-                playerArea.appendChild(playerBoardCont);
+                playerArea.appendChild(newPlayerBoard);
 
                 const opponentArea = document.createElement("div");
                 opponentArea.className = "opponent-area";
@@ -771,6 +797,11 @@ export function createPlayer(container) {
                 playerCont.appendChild(playerArea);
                 playerCont.appendChild(opponentArea);
 
+                const activeShadow =
+                    "0 0 0 4px rgba(217, 93, 93, 0.85), 0 8px 18px rgba(18, 59, 93, 0.18)";
+
+                oppBoardCont.style.boxShadow = activeShadow;
+
                 let selectedSquare = null;
 
                 fireBtn.addEventListener("click", () => {
@@ -791,7 +822,9 @@ export function createPlayer(container) {
                     if (cell.hasShip) {
                         const ship = cell.value;
                         selectedSquare.textContent = "X";
+                        selectedSquare.classList.add("hit");
                         selectedSquare.style.border = "2px solid red";
+                        oppBoardCont.style.boxShadow = activeShadow;
 
                         gameState.activePlayer = 1;
                         gameState.boardOwner = 2;
@@ -805,25 +838,32 @@ export function createPlayer(container) {
                                 })
 
                                 if (boundarySquare) {
-                                    boundarySquare.textContent = ".";
+                                    boundarySquare.textContent = "•";
+                                    boundarySquare.classList.add("miss");
                                 }
                             })
                         }
                     }
                     else {
-                        selectedSquare.textContent = ".";
-                        oppBoardCont.style.backgroundColor = "#f5f5f5";
-                        playerBoardCont.style.backgroundColor = "#ffffff";
+                        selectedSquare.textContent = "•";
+                        selectedSquare.classList.add("miss");
+                        
+                        oppBoardCont.style.boxShadow = "none";
+                        newPlayerBoard.style.boxShadow = "none";
 
-                        setTimeout(() => {
-                            computerMove(player.playerBoard, oppBoardCont, playerBoardCont, gameState);
+                        // oppBoardCont.style.backgroundColor = "#f5f5f5";
+                        // playerBoardCont.style.backgroundColor = "#ffffff";
+
+
+                        computerMoveTimer = setTimeout(() => {
+                            computerMove(player.playerBoard, oppBoardCont, newPlayerBoard, gameState, computer);
                         }, 1000);
                     }
                     let win = computer.playerBoard.checkShipSunk();
                     checkWin(win, player);
                 });
+                
 
-                // oppBoardCont.appendChild(fireBtn);
 
                 const oppSquares = oppBoardCont.querySelectorAll(".square");
                 oppSquares.forEach(square => {
@@ -834,11 +874,6 @@ export function createPlayer(container) {
                     
                     
                 });
-
-                // oppBoardCont.addEventListener('click', () => {
-                //     let win = computer.playerBoard.checkShipSunk();
-                //     checkWin(win, player);
-                // });
             })
             container.appendChild(start);   
         }
@@ -869,18 +904,28 @@ export function resetGame(container) {
     winPopup.replaceChildren();
 
     playerCont.style.pointerEvents = "auto";
+
     playerBoardCont.style.pointerEvents = "auto";
+    playerBoardCont.style.boxShadow = "none";
     oppBoardCont.style.pointerEvents = "auto";
+    oppBoardCont.style.boxShadow = "none";
 
     container.replaceChildren();
+    shipCont.replaceChildren();
+    clearTimeout(computerMoveTimer);
 }
 
 function checkWin(win, player) {
     if (win !== null) {
         winPopup.textContent = `${player.name} wins`;
+        if (player.type === "computer") {
+            winPopup.textContent = "You lose";
+        }
+        
 
         const playAgn = document.createElement('div');
         playAgn.textContent = "Play again";
+        playAgn.classList.add("play");
         winPopup.appendChild(playAgn);
 
         const sinOrMul = document.createElement('div');
@@ -918,7 +963,8 @@ function startGame(container, player1, player2) {
 
     const p1Board = document.createElement('div');
     p1Board.classList.add("gameboard");
-    player1Cont.appendChild(p1Board);
+    p1Board.classList.add("dim");
+    // player1Cont.appendChild(p1Board);
     renderBoard(player1.playerBoard, p1Board);
 
     const opp1Board = document.createElement('div');
@@ -928,6 +974,7 @@ function startGame(container, player1, player2) {
 
     const p2Board = document.createElement('div');
     p2Board.classList.add("gameboard");
+    // p2Board.classList.add("dim");
     player2Cont.appendChild(p2Board);
     renderBoard(player2.playerBoard, p2Board);
 
@@ -1091,6 +1138,7 @@ function fire(selectedSquare, gameState, player, playerNum, oppNumber, playerCon
     if (cell.hasShip) {
         const ship = cell.value;
         selectedSquare.textContent = "X";
+        selectedSquare.classList.add("hit");
         selectedSquare.style.border = "2px solid red";
 
         gameState.activePlayer = playerNum;
@@ -1105,14 +1153,16 @@ function fire(selectedSquare, gameState, player, playerNum, oppNumber, playerCon
                 })
 
                 if (boundarySquare) {
-                    boundarySquare.textContent = ".";
+                    boundarySquare.textContent = "•";
+                    boundarySquare.classList.add("miss");
                 }
             })
         }
     }
 
     else {
-        selectedSquare.textContent = ".";
+        selectedSquare.textContent = "•";
+        selectedSquare.classList.add("miss");
 
         gameState.activePlayer = oppNumber;
         gameState.boardOwner = playerNum;
@@ -1214,12 +1264,14 @@ export function multiplayer(container) {
 
                 container.replaceChildren();
 
+                const board1 = createBoardContainer();
+
                 player1.playerBoard.placeShipDefault();
-                renderBoard(player1.playerBoard.board, playerBoardCont);
-                renderShips(player1.playerBoard, shipCont, playerBoardCont);
-                dragAndDrop(player1.playerBoard, playerBoardCont);
+                renderBoard(player1.playerBoard.board, board1);
+                renderShips(player1.playerBoard, shipCont, board1);
+                dragAndDrop(player1.playerBoard, board1);
                 container.appendChild(shipCont);
-                container.appendChild(playerBoardCont);
+                container.appendChild(board1);
 
                 confirm.textContent = "Ready";
                 container.appendChild(confirm);

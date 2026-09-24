@@ -8,13 +8,17 @@ title.className = "game-title";
 title.textContent = "BattleShip Game"; 
 body.append(title);
 
+const buttonCont = document.createElement('div');
+buttonCont.className = "button-cont";
+body.appendChild(buttonCont);
+
 export const button1 = document.createElement('button');
 button1.textContent = "Single Player";
 button1.addEventListener('click', () => {
     resetGame(playerCont);
     const player = createPlayer(playerCont);
 });
-body.appendChild(button1);
+buttonCont.appendChild(button1);
 
 export const button2 = document.createElement('button');
 button2.textContent = "Multiplayer";
@@ -22,7 +26,7 @@ button2.addEventListener('click', () => {
     resetGame(playerCont);
     multiplayer(playerCont);
 });
-body.appendChild(button2);
+buttonCont.appendChild(button2);
 
 export const playerCont = document.createElement('div');
 playerCont.className = "player-cont";
