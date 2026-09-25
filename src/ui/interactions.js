@@ -1,5 +1,5 @@
 import { renderBoard } from "./renderBoard";
-import { button1, button2, playerBoardCont, oppBoardCont, winPopup, playerCont } from "..";
+import { button1, button2, playerBoardCont, oppBoardCont, winPopup, playerCont } from "../dom.js";
 
 export function setTarget(square, image, btn, player) {
     const coord = JSON.parse(square.dataset.myArray);

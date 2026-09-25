@@ -1,12 +1,65 @@
 import { renderBoard, renderOppBoard, createBoardContainer, renderShips } from "../ui/renderBoard";
 import { Player } from "../player";
 import { setTarget, dragAndDrop, hit, checkWin } from "../ui/interactions";
-import { button1, button2, playerBoardCont, oppBoardCont, winPopup, shipCont, playerCont } from "..";
+import { button1, button2, playerBoardCont, winPopup, shipCont, playerCont } from "../dom.js";
 import { computerMove } from "../game/ai";
 
 import targetImg from "../target.jpg";
 
 let computerMoveTimer;
+
+function computerTurn(gameboard, gameState, player, boardCont, newOppBoard) {
+    const result = computerMove(gameboard, gameState);
+
+    if (!result) return;
+
+    markComputerMove(result, boardCont, newOppBoard);
+
+    if (result.won) {
+        checkWin(true, player);
+        return;
+    }
+
+    // A hit gives the computer another move.
+    if (result.hit) {
+        computerMoveTimer = setTimeout(() => {
+            computerTurn(gameboard, gameState, player, boardCont, newOppBoard);
+        }, 1000);
+    }    
+}
+
+const activeShadow =
+    "0 0 0 4px rgba(217, 93, 93, 0.85), 0 8px 18px rgba(18, 59, 93, 0.18)";
+
+function markComputerMove(result, playerBoardCont, oppBoard) {
+    const [x, y] = result.target;
+
+    playerBoardCont.style.boxShadow = "none";
+
+    const square = [...playerBoardCont.children].find(square => {
+        const coordinates = JSON.parse(square.dataset.myArray);
+        return coordinates[0] === x && coordinates[1] === y;
+    });
+
+    if (square) {
+        square.textContent = result.hit ? "X" : "•";
+        square.classList.add(result.hit ? "hit" : "miss");
+    }
+
+    result.boundary.forEach(([x, y]) => {
+        const boundarySquare = [...playerBoardCont.children].find(square => {
+            const coordinates = JSON.parse(square.dataset.myArray);
+            return coordinates[0] === x && coordinates[1] === y;
+        });
+
+        if (boundarySquare) {
+            boundarySquare.textContent = "•";
+            boundarySquare.classList.add("miss");
+        }
+    });
+
+    oppBoard.style.boxShadow = result.hit ? "none" : activeShadow;
+}
 
 export function singlePlayer(container) {
 
@@ -85,9 +138,9 @@ export function singlePlayer(container) {
                 const computer = new Player('computer', 'computer');
                 computer.playerBoard.createBoard();
                 computer.playerBoard.placeShipRandom();
-                oppBoardCont.replaceChildren();
-                container.appendChild(oppBoardCont);
-                renderOppBoard(computer.playerBoard, oppBoardCont);
+                const newOppBoard = createBoardContainer();
+                // container.appendChild(newOppBoard);
+                renderOppBoard(computer.playerBoard, newOppBoard);
 
                 const image = document.createElement("img");
                 image.src = targetImg;
@@ -111,7 +164,7 @@ export function singlePlayer(container) {
                 oppName.textContent = "Computer Board";
                 opponentArea.appendChild(oppName);
 
-                opponentArea.appendChild(oppBoardCont);
+                opponentArea.appendChild(newOppBoard);
 
 
                 const fireBtn = document.createElement('button');
@@ -127,7 +180,7 @@ export function singlePlayer(container) {
                 const activeShadow =
                     "0 0 0 4px rgba(217, 93, 93, 0.85), 0 8px 18px rgba(18, 59, 93, 0.18)";
 
-                oppBoardCont.style.boxShadow = activeShadow;
+                newOppBoard.style.boxShadow = activeShadow;
 
                 let selectedSquare = null;
 
@@ -151,7 +204,7 @@ export function singlePlayer(container) {
                         selectedSquare.textContent = "X";
                         selectedSquare.classList.add("hit");
                         selectedSquare.style.border = "2px solid red";
-                        oppBoardCont.style.boxShadow = activeShadow;
+                        newOppBoard.style.boxShadow = activeShadow;
 
                         gameState.activePlayer = 1;
                         gameState.boardOwner = 2;
@@ -159,7 +212,7 @@ export function singlePlayer(container) {
                         if (ship.sunk) {
                             ship.boundary.forEach(([x ,y]) => {
                                 computer.playerBoard.board[x][y].hit = true;
-                                const boundarySquare = [...oppBoardCont.children].find(square => {
+                                const boundarySquare = [...newOppBoard.children].find(square => {
                                     const [squareX, squareY] = JSON.parse(square.dataset.myArray);
                                     return squareX === x && squareY === y;
                                 })
@@ -175,12 +228,18 @@ export function singlePlayer(container) {
                         selectedSquare.textContent = "•";
                         selectedSquare.classList.add("miss");
                         
-                        oppBoardCont.style.boxShadow = "none";
+                        newOppBoard.style.boxShadow = "none";
                         newPlayerBoard.style.boxShadow = "none";
 
 
                         computerMoveTimer = setTimeout(() => {
-                            computerMove(player.playerBoard, oppBoardCont, newPlayerBoard, gameState, computer);
+                            computerTurn(
+                                player.playerBoard,
+                                gameState,
+                                computer,
+                                newPlayerBoard,
+                                newOppBoard
+                            )
                         }, 1000);
                     }
                     let win = computer.playerBoard.checkShipSunk();
@@ -189,7 +248,7 @@ export function singlePlayer(container) {
                 
 
 
-                const oppSquares = oppBoardCont.querySelectorAll(".square");
+                const oppSquares = newOppBoard.querySelectorAll(".square");
                 oppSquares.forEach(square => {
                     square.addEventListener("click", () => {
                         selectedSquare = setTarget(square, image, fireBtn, computer);
@@ -232,8 +291,8 @@ export function resetGame(container) {
 
     playerBoardCont.style.pointerEvents = "auto";
     playerBoardCont.style.boxShadow = "none";
-    oppBoardCont.style.pointerEvents = "auto";
-    oppBoardCont.style.boxShadow = "none";
+    // oppBoardCont.style.pointerEvents = "auto";
+    // oppBoardCont.style.boxShadow = "none";
 
     container.replaceChildren();
     shipCont.replaceChildren();

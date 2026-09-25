@@ -1,5 +1,3 @@
-import { hit, checkWin } from "../ui/interactions";
-
 export function getAvailableTargets(gameboard, gameState) {
     const targets = [];
 
@@ -25,8 +23,8 @@ export function getNeighbors(x, y, gameboard) {
     ];
 
     return neighbors.filter(([nextX, nextY]) => 
-        nextX >=0 && nextX < 10 &&
-        nextY >=0 && nextY < 10 &&
+        nextX >= 0 && nextX < 10 &&
+        nextY >= 0 && nextY < 10 &&
         !gameboard.board[nextX][nextY].hit  
     );
 }
@@ -50,80 +48,42 @@ export function chooseTarget(gameboard, gameState) {
     return null;
 }
 
-export function computerMove (gameboard, 
-                        boardCont, 
-                        oppBoardCont, 
-                        gameState,
-                        player) {
-    
-    // The computer uses a queue of priority targets. When a ship is hit adjacent cells are 
-    // added to the queue; when no active target remains it falls back to random hunt targeting
-    // unhit cells 
-    
-    if(gameState.activePlayer !== 2 || gameState.boardOwner !== 1) return;
+export function computerMove(gameboard, gameState) {
+    if (gameState.activePlayer !== 2 || gameState.boardOwner !== 1) {
+        return null;
+    }
 
-    oppBoardCont.style.boxShadow = "none";
-    boardCont.style.boxShadow = "none";
-    const activeShadow =
-        "0 0 0 4px rgba(217, 93, 93, 0.85), 0 8px 18px rgba(18, 59, 93, 0.18)";
-    
     const target = chooseTarget(gameboard, gameState);
-
-    if (!target) return;
+    if (!target) return null;
 
     const [x, y] = target;
     const cell = gameboard.board[x][y];
 
-    hit (x, y, gameboard);
+    gameboard.receiveAttack(x, y);
 
-    const square = [...oppBoardCont.children].find(square => {
-        const coordinates = JSON.parse(square.dataset.myArray);
-        return coordinates[0] === x && coordinates[1] === y;
-    });
+    const result = {
+        target,
+        hit: cell.hasShip,
+        sunk: cell.hasShip && cell.value.sunk,
+        boundary: []
+    };
 
-    if (cell.hasShip) {
-        square.textContent ="X";
-        square.classList.add("hit");
+    if (result.sunk) {
+        gameState.compTargets = [];
+        result.boundary = cell.value.boundary;
 
-        if (cell.value.sunk) {
-            gameState.compTargets = [];
-            cell.value.boundary.forEach(([x, y]) => {
-                //Mark cells around a sunk ship as unavailable targets 
-                gameboard.board[x][y].hit = true;
-                const boundarySquare = [...oppBoardCont.children].find(square => {
-                    const [squareX, squareY] = JSON.parse(square.dataset.myArray);
-                    return squareX === x && squareY === y;
-                })
-
-                if (boundarySquare) {
-                    boundarySquare.textContent = "•";
-                    boundarySquare.classList.add("miss");
-                }
-            });
-
-        } 
-        else {
-            //After a hit prioritize adjacent cells to locate the rest of the ship
-            gameState.compTargets.unshift(...getNeighbors(x, y, gameboard));
-        }
-
-        setTimeout(() => {
-            computerMove(gameboard, boardCont, oppBoardCont, gameState, player);
-        }, 1000);
-
-        return;
+        // Prevent the computer from targeting boundary cells.
+        result.boundary.forEach(([boundaryX, boundaryY]) => {
+            gameboard.board[boundaryX][boundaryY].hit = true;
+        });
+    } else if (result.hit) {
+        gameState.compTargets.unshift(...getNeighbors(x, y, gameboard));
+    } else {
+        gameState.activePlayer = 1;
+        gameState.boardOwner = 2;
     }
 
-    square.textContent = "•"
-    square.classList.add("miss");
+    result.won = gameboard.checkShipSunk();
 
-    boardCont.style.boxShadow = activeShadow;
-    oppBoardCont.style.boxShadow = "none";
-
-    gameState.activePlayer = 1;
-    gameState.boardOwner = 2;
-
-    let win = gameboard.checkShipSunk();
-    checkWin(win, player);
-     
+    return result;
 }

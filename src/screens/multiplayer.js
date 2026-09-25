@@ -1,7 +1,7 @@
 import { renderBoard, renderOppBoard, createBoardContainer, renderShips } from "../ui/renderBoard";
 import { Player } from "../player";
 import { setTarget, fire, waitForClick, dragAndDrop, checkWin } from "../ui/interactions";
-import { button1, button2, playerBoardCont, shipCont } from "..";
+import { button1, button2, playerBoardCont, shipCont } from "../dom.js";
 import targetImg from "../target.jpg";
 
 function startGame(container, player1, player2) {
