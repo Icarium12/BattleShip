@@ -1,0 +1,7 @@
+node_modules
+dist
+package-lock.json
+babel.config.js
+README.md
+.prettier.json
+webpack.config.js
